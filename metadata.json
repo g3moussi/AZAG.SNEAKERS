@@ -1,0 +1,8 @@
+{
+  "name": "Remix AZAG - E-Commerce Store",
+  "description": "Boutique en ligne inspirée de KLAIM.ma - Collection Sandales \u0026 Mules avec filtres, panier, aperçu rapide et commande avec paiement à la livraison.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
