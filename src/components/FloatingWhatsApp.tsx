@@ -1,35 +1,44 @@
 import React, { useState } from 'react';
-import { MessageCircle, X } from 'lucide-react';
+import { X } from 'lucide-react';
+import { Language, TRANSLATIONS } from '../utils/i18n';
 
-export const FloatingWhatsApp: React.FC = () => {
+interface FloatingWhatsAppProps {
+  lang?: Language;
+}
+
+export const FloatingWhatsApp: React.FC<FloatingWhatsAppProps> = ({ lang = 'fr' }) => {
   const [showTooltip, setShowTooltip] = useState(true);
 
+  const t = TRANSLATIONS[lang];
   const whatsappNumber = '212752424260';
-  const message = encodeURIComponent("Bonjour AZAG, je vous contacte depuis le site web pour des informations sur vos chaussures.");
+  const rawMessage = lang === 'ar' 
+    ? "مرحباً AZAG، أتواصل معكم من الموقع الإلكتروني للحصول على معلومات حول أحذيتكم."
+    : "Bonjour AZAG, je vous contacte depuis le site web pour des informations sur vos chaussures.";
+  const message = encodeURIComponent(rawMessage);
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
 
   return (
-    <div className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-50 flex flex-col items-end gap-2 group">
+    <div className="fixed bottom-5 end-5 sm:bottom-6 sm:end-6 z-50 flex flex-col items-end gap-2 group">
       {/* Tooltip Bubble */}
       {showTooltip && (
         <div className="relative bg-[#2C2118] text-white text-xs px-3.5 py-2 rounded-2xl shadow-2xl border border-[#D4A373]/30 flex items-center gap-2 max-w-[220px] sm:max-w-xs animate-bounce-short">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
           <span className="font-medium text-[11px] sm:text-xs leading-tight">
-            Besoin d'aide ? <strong>Discutez avec nous</strong>
+            {t.floatingHelp} <strong>{t.contactViaWhatsApp}</strong>
           </span>
           <button
             onClick={(e) => {
               e.stopPropagation();
               setShowTooltip(false);
             }}
-            className="text-stone-400 hover:text-white p-0.5 rounded-full transition-colors ml-auto shrink-0"
+            className="text-stone-400 hover:text-white p-0.5 rounded-full transition-colors ms-auto shrink-0"
             title="Fermer"
             aria-label="Fermer le message"
           >
             <X className="w-3.5 h-3.5" />
           </button>
           {/* Arrow */}
-          <div className="absolute -bottom-1.5 right-5 w-3 h-3 bg-[#2C2118] rotate-45 border-r border-b border-[#D4A373]/30" />
+          <div className="absolute -bottom-1.5 end-5 w-3 h-3 bg-[#2C2118] rotate-45 border-r border-b border-[#D4A373]/30" />
         </div>
       )}
 

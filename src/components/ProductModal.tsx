@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Star, Heart, ShoppingBag, Truck, ShieldCheck, Ruler, Check, ChevronRight, ArrowLeft } from 'lucide-react';
 import { Product, ProductColor } from '../types';
 import { Currency, formatPrice } from '../utils/format';
+import { Language, TRANSLATIONS, getTranslatedProduct } from '../utils/i18n';
 
 interface ProductModalProps {
   product: Product | null;
@@ -12,19 +13,24 @@ interface ProductModalProps {
   onAddToCart: (product: Product, size: number, color: ProductColor, quantity: number) => void;
   onOpenCODCheckout: (product: Product, size: number, color: ProductColor, quantity: number) => void;
   onOpenSizeGuide: () => void;
+  lang?: Language;
 }
 
 export const ProductModal: React.FC<ProductModalProps> = ({
-  product,
+  product: rawProduct,
   currency,
   onClose,
   isWishlisted,
   onToggleWishlist,
   onAddToCart,
   onOpenCODCheckout,
-  onOpenSizeGuide
+  onOpenSizeGuide,
+  lang = 'fr'
 }) => {
-  if (!product) return null;
+  if (!rawProduct) return null;
+
+  const product = getTranslatedProduct(rawProduct, lang);
+  const t = TRANSLATIONS[lang];
 
   const [selectedColor, setSelectedColor] = useState<ProductColor>(product.colors[0] || { name: 'Standard', hex: '#000', image: product.mainImage });
   const [selectedSize, setSelectedSize] = useState<number>(product.sizes[1] || product.sizes[0]);
@@ -163,7 +169,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                   ))}
                 </div>
                 <span className="text-sm font-bold text-[#2C2118]">{product.rating}</span>
-                <span className="text-xs text-[#7C6E65]">({product.reviewsCount} avis vérifiés)</span>
+                <span className="text-xs text-[#7C6E65]">({product.reviewsCount} {t.verifiedBuyer})</span>
               </div>
 
               {/* Price */}
@@ -177,7 +183,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                   </span>
                 )}
                 <span className="text-xs text-emerald-700 bg-emerald-50 font-semibold px-2 py-0.5 rounded-full border border-emerald-200">
-                  En Stock • Expédition 24h
+                  {t.inStock}
                 </span>
               </div>
 
@@ -186,7 +192,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
               {/* Color Picker */}
               <div className="mb-5">
                 <label className="block text-xs font-bold text-[#3D3028] uppercase tracking-wider mb-2">
-                  Couleur: <span className="font-medium text-[#2C2118]">{selectedColor.name}</span>
+                  {t.selectColor}: <span className="font-medium text-[#2C2118]">{selectedColor.name}</span>
                 </label>
                 <div className="flex items-center gap-3">
                   {product.colors.map((col) => (
@@ -210,14 +216,14 @@ export const ProductModal: React.FC<ProductModalProps> = ({
               <div className="mb-5">
                 <div className="flex justify-between items-center mb-2">
                   <label className="text-xs font-bold text-[#3D3028] uppercase tracking-wider">
-                    Pointure (EU): <span className="font-black text-[#2C2118] text-sm">{selectedSize}</span>
+                    {t.selectSize}: <span className="font-black text-[#2C2118] text-sm">{selectedSize}</span>
                   </label>
                   <button
                     onClick={onOpenSizeGuide}
                     className="flex items-center gap-1 text-xs text-[#8C5628] hover:text-[#6B401D] font-medium underline"
                   >
                     <Ruler className="w-3.5 h-3.5" />
-                    Guide des pointures
+                    {t.sizeGuide}
                   </button>
                 </div>
 
@@ -240,7 +246,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
 
               {/* Quantity Counter */}
               <div className="mb-6 flex items-center gap-4">
-                <span className="text-xs font-bold text-[#3D3028] uppercase tracking-wider">Quantité:</span>
+                <span className="text-xs font-bold text-[#3D3028] uppercase tracking-wider">{t.quantity}:</span>
                 <div className="flex items-center border border-[#E8E2D9] rounded-xl overflow-hidden bg-[#F4EFEB]">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -267,10 +273,10 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                   <ShoppingBag className="w-5 h-5 text-[#D4A373] group-hover:scale-110 transition-transform" />
                   {addedToast ? (
                     <span className="text-emerald-300 font-bold flex items-center gap-1">
-                      <Check className="w-5 h-5" /> Ajouté au Panier !
+                      <Check className="w-5 h-5" /> {lang === 'ar' ? 'تمت الإضافة للسلة!' : 'Ajouté au Panier !'}
                     </span>
                   ) : (
-                    `Ajouter au Panier • ${formatPrice(product.price * quantity, currency)}`
+                    `${t.addToCart} • ${formatPrice(product.price * quantity, currency)}`
                   )}
                 </button>
 
@@ -280,7 +286,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                   className="w-full bg-[#D4A373] text-[#2C2118] font-extrabold py-3.5 px-6 rounded-2xl hover:bg-[#C08552] transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform active:scale-98"
                 >
                   <Truck className="w-5 h-5 text-[#2C2118]" />
-                  Acheter Maintenant (Paiement à la Livraison)
+                  {t.buyNowCOD}
                 </button>
               </div>
 
@@ -293,7 +299,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                       activeTab === 'desc' ? 'border-[#2C2118] text-[#2C2118]' : 'border-transparent text-[#7C6E65] hover:text-[#2C2118]'
                     }`}
                   >
-                    Description
+                    {t.descriptionTitle}
                   </button>
                   <button
                     onClick={() => setActiveTab('materials')}
@@ -301,7 +307,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                       activeTab === 'materials' ? 'border-[#2C2118] text-[#2C2118]' : 'border-transparent text-[#7C6E65] hover:text-[#2C2118]'
                     }`}
                   >
-                    Composition & Entretien
+                    {t.materialsTitle}
                   </button>
                   <button
                     onClick={() => setActiveTab('shipping')}

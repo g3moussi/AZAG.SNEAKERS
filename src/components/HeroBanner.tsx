@@ -1,26 +1,21 @@
 import React from 'react';
 import heroImg from '../assets/images/klaim_sandal_hero_1785353472195.jpg';
+import { Language, TRANSLATIONS } from '../utils/i18n';
 
 interface HeroBannerProps {
   activeCategory: string;
   onSelectCategory: (cat: string) => void;
   totalProducts: number;
+  lang: Language;
 }
 
 export const HeroBanner: React.FC<HeroBannerProps> = ({
   activeCategory,
   onSelectCategory,
-  totalProducts
+  totalProducts,
+  lang
 }) => {
-  const categories = [
-    { id: 'all', label: 'Toutes les Chaussures', badge: totalProducts },
-    { id: 'mocassins', label: 'Mocassins & Loafers', badge: 'Populaire' },
-    { id: 'baskets', label: 'Baskets & Sneakers Chic', badge: 'Nouveau' },
-    { id: 'escarpins', label: 'Escarpins & Talons', badge: 'Élégance' },
-    { id: 'sandales', label: 'Sandales & Nu-pieds', badge: 'Été' },
-    { id: 'mules', label: 'Mules & Sliders', badge: 'Tendance' },
-    { id: 'bottines', label: 'Bottines & Derbies', badge: 'Cuir' }
-  ];
+  const t = TRANSLATIONS[lang];
 
   return (
     <div className="relative overflow-hidden bg-[#2C2118] text-[#FAF8F5]">
@@ -35,33 +30,33 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
         <div className="absolute inset-0 bg-gradient-to-r from-[#1E1711]/95 via-[#2C2118]/80 to-[#1E1711]/90" />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-18">
         <div className="max-w-3xl">
           <div className="inline-flex items-center gap-2 bg-[#D4A373]/20 backdrop-blur-md border border-[#D4A373]/40 px-3 py-1 rounded-full text-[#E6CCB2] text-xs font-semibold uppercase tracking-widest mb-4">
             <span className="w-2 h-2 rounded-full bg-[#D4A373] animate-ping" />
-            Maison de Chaussures • AZAG Maroc
+            {t.heroTagline}
           </div>
 
           <h1 className="font-serif text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
-            Chaussures & Maroquinerie <span className="text-[#D4A373] italic font-normal">Cuir Véritable</span>
+            {t.heroTitle} <span className="text-[#D4A373] italic font-normal">{t.heroHighlight}</span>
           </h1>
 
           <p className="mt-4 text-base sm:text-lg text-[#DDD3C7] font-light leading-relaxed max-w-2xl">
-            Mocassins, Baskets Chic, Escarpins, Bottines et Sandales façonnés à la main au Maroc. Un confort remarquable et un style raffiné pour toutes les occasions.
+            {t.heroSubtitle}
           </p>
 
-          <div className="mt-6 flex flex-wrap gap-4 text-xs font-medium text-[#C8B8A6]">
-            <span className="flex items-center gap-1.5 text-emerald-300 font-bold bg-emerald-950/60 border border-emerald-500/30 px-2.5 py-1 rounded-full">
+          <div className="mt-6 flex flex-wrap gap-3 text-xs font-medium text-[#C8B8A6]">
+            <span className="flex items-center gap-1.5 text-emerald-300 font-bold bg-emerald-950/60 border border-emerald-500/30 px-3 py-1.5 rounded-full">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              Livraison GRATUITE partout au Maroc 🚚
+              {t.freeShipping}
             </span>
-            <span className="flex items-center gap-1.5">
+            <span className="flex items-center gap-1.5 bg-[#3D3028]/80 px-3 py-1.5 rounded-full border border-[#E8E2D9]/10">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              Paiement à la livraison (COD)
+              {t.codBadge}
             </span>
-            <span className="flex items-center gap-1.5">
+            <span className="flex items-center gap-1.5 bg-[#3D3028]/80 px-3 py-1.5 rounded-full border border-[#E8E2D9]/10">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              Satisfait ou Échangé sous 7 jours
+              {t.returnsBadge}
             </span>
           </div>
         </div>

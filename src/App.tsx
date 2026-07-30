@@ -20,12 +20,22 @@ import { FloatingWhatsApp } from './components/FloatingWhatsApp';
 import { INITIAL_PRODUCTS } from './data/products';
 import { Product, CartItem, FilterState, ProductColor } from './types';
 import { Currency } from './utils/format';
+import { Language, TRANSLATIONS, getTranslatedProduct } from './utils/i18n';
 import { SlidersHorizontal, LayoutGrid, Grid, ListFilter, RotateCcw } from 'lucide-react';
 
 export default function App() {
   const [products] = useState<Product[]>(INITIAL_PRODUCTS);
   const [activeCategory, setActiveCategory] = useState<string>('femme');
   const [currency, setCurrency] = useState<Currency>('MAD');
+  const [language, setLanguage] = useState<Language>('fr');
+
+  const t = TRANSLATIONS[language];
+
+  // Sync document dir attribute for RTL support
+  useEffect(() => {
+    document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.lang = language;
+  }, [language]);
 
   // Filter State
   const [filters, setFilters] = useState<FilterState>({
@@ -173,6 +183,30 @@ export default function App() {
     });
   }, [products, activeCategory, filters]);
 
+  const categoryTitles: Record<string, string> = language === 'ar' ? {
+    all: 'جميع الأحذية والصنادل',
+    homme: 'تشكيلة الرجال — جلد طبيعي',
+    femme: 'تشكيلة النساء — أناقة وراحة',
+    enfant: 'تشكيلة الأطفال — مرونة وجودة',
+    mocassins: 'أحذية الموكاسان الجلدية',
+    baskets: 'الأحذية الرياضية الأنيقة (سنيكرز)',
+    escarpins: 'أحذية الكعب الأنيقة',
+    sandales: 'الصنادل المكشوفة',
+    mules: 'أحذية الميول التقليدية',
+    bottines: 'أحذية البوتين الجلدية'
+  } : {
+    all: 'Toutes nos Chaussures & Sandales',
+    homme: 'Collection Homme — Cuir Véritable',
+    femme: 'Collection Femme — Élégance & Confort',
+    enfant: 'Collection Enfant — Souplesse & Qualité',
+    mocassins: 'Nos Mocassins & Loafers en Cuir',
+    baskets: 'Nos Baskets & Sneakers Chic',
+    escarpins: 'Nos Escarpins & Talons Élégants',
+    sandales: 'Nos Sandales & Nu-Pieds',
+    mules: 'Nos Mules & Sliders Artisanales',
+    bottines: 'Nos Bottines & Derbies en Cuir'
+  };
+
   return (
     <div className="min-h-screen bg-[#FAF8F5] text-[#3D3028] flex flex-col font-sans selection:bg-[#D4A373] selection:text-[#2C2118]">
       {/* Top Header Navbar */}
@@ -186,6 +220,8 @@ export default function App() {
         onSelectCategory={handleSelectCategory}
         currency={currency}
         onCurrencyChange={setCurrency}
+        lang={language}
+        onLanguageChange={setLanguage}
       />
 
       {/* Hero Banner Header */}
@@ -194,6 +230,7 @@ export default function App() {
           activeCategory={activeCategory}
           onSelectCategory={handleSelectCategory}
           totalProducts={products.length}
+          lang={language}
         />
       </div>
 
@@ -203,23 +240,14 @@ export default function App() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 mb-8 border-b border-[#E8E2D9]">
           <div>
             <h2 className="font-serif text-2xl sm:text-3xl font-extrabold text-[#2C2118]">
-              {
-                {
-                  all: 'Toutes nos Chaussures & Sandales',
-                  homme: 'Collection Homme — Cuir Véritable',
-                  femme: 'Collection Femme — Élégance & Confort',
-                  enfant: 'Collection Enfant — Souplesse & Qualité',
-                  mocassins: 'Nos Mocassins & Loafers en Cuir',
-                  baskets: 'Nos Baskets & Sneakers Chic',
-                  escarpins: 'Nos Escarpins & Talons Élégants',
-                  sandales: 'Nos Sandales & Nu-Pieds',
-                  mules: 'Nos Mules & Sliders Artisanales',
-                  bottines: 'Nos Bottines & Derbies en Cuir'
-                }[activeCategory] || `Collection ${activeCategory}`
-              }
+              {categoryTitles[activeCategory] || `Collection ${activeCategory}`}
             </h2>
             <p className="text-xs text-[#7C6E65] mt-0.5">
-              Affichage de <strong className="text-[#2C2118] font-bold">{filteredProducts.length}</strong> modèles disponibles en livraison gratuite dès 400 DH
+              {language === 'ar' ? (
+                <>عرض <strong className="text-[#2C2118] font-bold">{filteredProducts.length}</strong> نموذجاً مع توصيل مجاني ابتداءً من 400 درهم</>
+              ) : (
+                <>Affichage de <strong className="text-[#2C2118] font-bold">{filteredProducts.length}</strong> modèles disponibles en livraison gratuite dès 400 DH</>
+              )}
             </p>
           </div>
 
@@ -230,7 +258,7 @@ export default function App() {
               className="lg:hidden flex items-center gap-2 bg-white text-[#3D3028] border border-[#E8E2D9] px-4 py-2 rounded-xl text-xs font-bold shadow-xs hover:bg-[#F4EFEB]"
             >
               <SlidersHorizontal className="w-4 h-4 text-[#2C2118]" />
-              <span>Filtres</span>
+              <span>{t.filterBtn}</span>
             </button>
 
             {/* Grid Columns Switcher */}
@@ -253,17 +281,17 @@ export default function App() {
 
             {/* Sort Dropdown */}
             <div className="flex items-center gap-2 bg-white border border-[#E8E2D9] px-3 py-2 rounded-xl text-xs font-medium shadow-xs">
-              <span className="text-[#7C6E65] font-bold uppercase text-[10px]">Trier:</span>
+              <span className="text-[#7C6E65] font-bold uppercase text-[10px]">{t.sortLabel}:</span>
               <select
                 value={filters.sortBy}
                 onChange={(e) => setFilters(prev => ({ ...prev, sortBy: e.target.value as any }))}
                 className="bg-transparent focus:outline-hidden text-[#2C2118] font-bold cursor-pointer"
               >
-                <option value="popular">Meilleures Ventes</option>
-                <option value="newest">Nouveautés</option>
-                <option value="price-asc">Prix: Croissant</option>
-                <option value="price-desc">Prix: Décroissant</option>
-                <option value="rating">Meilleures Notes</option>
+                <option value="popular">{t.sortPopular}</option>
+                <option value="newest">{t.sortNewest}</option>
+                <option value="price-asc">{t.sortPriceAsc}</option>
+                <option value="price-desc">{t.sortPriceDesc}</option>
+                <option value="rating">{t.sortRating}</option>
               </select>
             </div>
           </div>
@@ -298,9 +326,9 @@ export default function App() {
                 <div className="w-16 h-16 bg-stone-100 text-stone-400 rounded-full flex items-center justify-center mx-auto">
                   <SlidersHorizontal className="w-8 h-8" />
                 </div>
-                <h3 className="font-serif text-xl font-bold text-stone-900">Aucune sandale ne correspond aux filtres</h3>
+                <h3 className="font-serif text-xl font-bold text-stone-900">{t.noProductsFound}</h3>
                 <p className="text-xs text-stone-500 max-w-md mx-auto">
-                  Essayez d'élargir la plage de prix ou de réinitialiser vos critères de recherche de pointure/couleur.
+                  {t.noProductsDesc}
                 </p>
                 <button
                   onClick={() => {
@@ -317,7 +345,7 @@ export default function App() {
                   }}
                   className="bg-stone-900 text-white font-bold text-xs px-6 py-3 rounded-xl hover:bg-stone-800 transition-colors inline-flex items-center gap-2"
                 >
-                  <RotateCcw className="w-4 h-4" /> Réinitialiser tous les filtres
+                  <RotateCcw className="w-4 h-4" /> {t.resetFilters}
                 </button>
               </div>
             ) : (
@@ -331,6 +359,7 @@ export default function App() {
                     onToggleWishlist={handleToggleWishlist}
                     onQuickView={(p) => setSelectedProduct(p)}
                     onQuickAddToCart={(p, sz, col) => handleAddToCart(p, sz, col, 1)}
+                    lang={language}
                   />
                 ))}
               </div>
@@ -340,24 +369,24 @@ export default function App() {
       </main>
 
       {/* Brand Story & Artisanat Section */}
-      <BrandStory />
+      <BrandStory lang={language} />
 
       {/* Trust & Guarantees Bar */}
-      <TrustFeatures />
+      <TrustFeatures lang={language} />
 
       {/* Customer Reviews Carousel */}
       <div id="avis">
-        <ReviewsSection />
+        <ReviewsSection lang={language} />
       </div>
 
       {/* FAQ & Help Section */}
-      <FAQSection />
+      <FAQSection lang={language} />
 
       {/* Contact & Showroom Section */}
-      <ContactSection />
+      <ContactSection lang={language} />
 
       {/* Footer */}
-      <Footer />
+      <Footer lang={language} />
 
       {/* Modals & Drawers */}
       <ProductModal
@@ -369,6 +398,7 @@ export default function App() {
         onAddToCart={handleAddToCart}
         onOpenCODCheckout={handleOpenCODDirect}
         onOpenSizeGuide={() => setIsSizeGuideOpen(true)}
+        lang={language}
       />
 
       <FilterSidebar
@@ -406,6 +436,7 @@ export default function App() {
         }}
         onRemoveItem={(idx) => setCart(prev => prev.filter((_, i) => i !== idx))}
         onOpenCODCheckout={handleOpenCartCOD}
+        lang={language}
       />
 
       <CODCheckoutModal
@@ -419,6 +450,7 @@ export default function App() {
             setCart([]);
           }
         }}
+        lang={language}
       />
 
       <SearchModal
@@ -427,6 +459,7 @@ export default function App() {
         products={products}
         currency={currency}
         onSelectProduct={(p) => setSelectedProduct(p)}
+        lang={language}
       />
 
       <WishlistDrawer
@@ -436,15 +469,17 @@ export default function App() {
         currency={currency}
         onRemoveWishlist={handleToggleWishlist}
         onQuickView={(p) => setSelectedProduct(p)}
+        lang={language}
       />
 
       <SizeGuideModal
         isOpen={isSizeGuideOpen}
         onClose={() => setIsSizeGuideOpen(false)}
+        lang={language}
       />
 
       {/* Floating WhatsApp Quick Contact Button */}
-      <FloatingWhatsApp />
+      <FloatingWhatsApp lang={language} />
     </div>
   );
 }

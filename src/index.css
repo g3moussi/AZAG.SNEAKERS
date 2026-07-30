@@ -24,6 +24,15 @@ body {
   font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
+[dir="rtl"] body,
+[dir="rtl"] {
+  font-family: 'Alexandria', 'Cairo', 'Plus Jakarta Sans', sans-serif;
+}
+
+[dir="rtl"] .font-serif {
+  font-family: 'Cairo', 'Playfair Display', serif;
+}
+
 /* Custom scrollbar styling for natural tones */
 .no-scrollbar::-webkit-scrollbar {
   display: none;

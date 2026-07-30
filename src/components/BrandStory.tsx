@@ -1,8 +1,15 @@
 import React from 'react';
 import { Award, Feather, HeartHandshake, ShieldCheck, Sparkles } from 'lucide-react';
 import sandalHero from '../assets/images/klaim_sandal_hero_1785353472195.jpg';
+import { Language, TRANSLATIONS } from '../utils/i18n';
 
-export const BrandStory: React.FC = () => {
+interface BrandStoryProps {
+  lang?: Language;
+}
+
+export const BrandStory: React.FC<BrandStoryProps> = ({ lang = 'fr' }) => {
+  const t = TRANSLATIONS[lang];
+
   return (
     <section id="histoire" className="py-16 sm:py-24 bg-[#FAF8F5] border-t border-[#E8E2D9]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -19,10 +26,10 @@ export const BrandStory: React.FC = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-[#2C2118]/80 via-transparent to-transparent" />
               <div className="absolute bottom-6 left-6 right-6 text-white">
                 <span className="text-xs font-bold uppercase tracking-widest text-[#D4A373]">
-                  Ateliers AZAG • Marrakech & Fès
+                  {lang === 'ar' ? 'ورشات AZAG • فاس ومراكش' : 'Ateliers AZAG • Fès & Marrakech'}
                 </span>
                 <h3 className="font-serif text-xl sm:text-2xl font-bold mt-1">
-                  L'Art de la Maroquinerie Traditionnelle
+                  {lang === 'ar' ? 'فن الصناعة الجلدية التقليدية' : "L'Art de la Maroquinerie Traditionnelle"}
                 </h3>
               </div>
             </div>
@@ -34,8 +41,8 @@ export const BrandStory: React.FC = () => {
                   100%
                 </div>
                 <div>
-                  <h4 className="font-serif font-bold text-sm text-white">Cuir Véritable Marocain</h4>
-                  <p className="text-[11px] text-[#C8B8A6] mt-0.5">Tannage végétal naturel et finitions cousues main par nos Maâlems.</p>
+                  <h4 className="font-serif font-bold text-sm text-white">{lang === 'ar' ? 'جلد مغربي أصلي' : 'Cuir Véritable Marocain'}</h4>
+                  <p className="text-[11px] text-[#C8B8A6] mt-0.5">{lang === 'ar' ? 'دباغة طبيعية ولمسات يدين المعلمين' : 'Tannage végétal naturel et finitions cousues main par nos Maâlems.'}</p>
                 </div>
               </div>
             </div>
@@ -45,19 +52,19 @@ export const BrandStory: React.FC = () => {
           <div className="space-y-6">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#F5EBE6] border border-[#E6CCB2] rounded-full text-xs font-bold text-[#6B401D] uppercase tracking-widest">
               <Sparkles className="w-3.5 h-3.5 text-[#D4A373]" />
-              Savoir-Faire & Création
+              {t.navCraft}
             </div>
 
             <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-[#2C2118] leading-tight">
-              Une Maison Dédiée à l'Elégance et au Confort
+              {t.storyTitle}
             </h2>
 
             <p className="text-sm sm:text-base text-[#6B5746] leading-relaxed">
-              Fondée avec la passion d'allier l'artisanat ancestral marocain aux tendances contemporaines, <strong>AZAG</strong> conçoit des chaussures en cuir véritable : mocassins, baskets chic, escarpins, bottines, mules et sandales d'une légèreté et d'une souplesse inégalées.
+              {t.storyDesc1}
             </p>
 
             <p className="text-sm sm:text-base text-[#6B5746] leading-relaxed">
-              Chaque paire est fabriquée en petites séries à partir de peaux de cuir d'agneau et de vachette rigoureusement sélectionnées. Nos semelles ergonomiques intègrent une mousse à mémoire de forme pour vous offrir un amorti parfait du matin au soir.
+              {t.storyDesc2}
             </p>
 
             {/* 4 Feature pillars */}
@@ -66,32 +73,32 @@ export const BrandStory: React.FC = () => {
                 <div className="w-9 h-9 rounded-xl bg-[#F4EFEB] text-[#2C2118] flex items-center justify-center font-bold">
                   <Award className="w-5 h-5 text-[#D4A373]" />
                 </div>
-                <h4 className="font-serif text-sm font-bold text-[#2C2118]">Cuir Première Qualité</h4>
-                <p className="text-xs text-[#7C6E65]">Cuir souple qui s'adapte naturellement à la morphologie de votre pied.</p>
+                <h4 className="font-serif text-sm font-bold text-[#2C2118]">{t.feature1Title}</h4>
+                <p className="text-xs text-[#7C6E65]">{t.feature1Desc}</p>
               </div>
 
               <div className="p-4 rounded-2xl bg-white border border-[#E8E2D9] space-y-2">
                 <div className="w-9 h-9 rounded-xl bg-[#F4EFEB] text-[#2C2118] flex items-center justify-center font-bold">
                   <Feather className="w-5 h-5 text-[#D4A373]" />
                 </div>
-                <h4 className="font-serif text-sm font-bold text-[#2C2118]">Semelle Amortissante</h4>
-                <p className="text-xs text-[#7C6E65]">Matelassage intérieur anti-fatigue pour une marche tout en douceur.</p>
+                <h4 className="font-serif text-sm font-bold text-[#2C2118]">{t.feature2Title}</h4>
+                <p className="text-xs text-[#7C6E65]">{t.feature2Desc}</p>
               </div>
 
               <div className="p-4 rounded-2xl bg-white border border-[#E8E2D9] space-y-2">
                 <div className="w-9 h-9 rounded-xl bg-[#F4EFEB] text-[#2C2118] flex items-center justify-center font-bold">
                   <HeartHandshake className="w-5 h-5 text-[#D4A373]" />
                 </div>
-                <h4 className="font-serif text-sm font-bold text-[#2C2118]">Éthique & Fait Main</h4>
-                <p className="text-xs text-[#7C6E65]">Valorisation du travail artisanal local et juste rémunération des artisans.</p>
+                <h4 className="font-serif text-sm font-bold text-[#2C2118]">{t.feature3Title}</h4>
+                <p className="text-xs text-[#7C6E65]">{t.feature3Desc}</p>
               </div>
 
               <div className="p-4 rounded-2xl bg-white border border-[#E8E2D9] space-y-2">
                 <div className="w-9 h-9 rounded-xl bg-[#F4EFEB] text-[#2C2118] flex items-center justify-center font-bold">
                   <ShieldCheck className="w-5 h-5 text-[#D4A373]" />
                 </div>
-                <h4 className="font-serif text-sm font-bold text-[#2C2118]">Échange Simplifié 7j</h4>
-                <p className="text-xs text-[#7C6E65]">Essayez chez vous. Changement de pointure garanti rapidement.</p>
+                <h4 className="font-serif text-sm font-bold text-[#2C2118]">{t.trust3Title}</h4>
+                <p className="text-xs text-[#7C6E65]">{t.trust3Desc}</p>
               </div>
             </div>
           </div>

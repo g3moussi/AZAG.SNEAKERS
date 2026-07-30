@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Trash2, ShoppingBag, Truck, Tag, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
 import { CartItem } from '../types';
 import { Currency, formatPrice } from '../utils/format';
+import { Language, TRANSLATIONS, getTranslatedProduct } from '../utils/i18n';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -11,16 +12,18 @@ interface CartDrawerProps {
   onUpdateQuantity: (index: number, newQty: number) => void;
   onRemoveItem: (index: number) => void;
   onOpenCODCheckout: () => void;
+  lang?: Language;
 }
 
 export const CartDrawer: React.FC<CartDrawerProps> = ({
   isOpen,
   onClose,
-  items,
+  items: rawItems,
   currency,
   onUpdateQuantity,
   onRemoveItem,
-  onOpenCODCheckout
+  onOpenCODCheckout,
+  lang = 'fr'
 }) => {
   const [promoCode, setPromoCode] = useState('');
   const [discountPercent, setDiscountPercent] = useState(0);
@@ -28,6 +31,13 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   const [promoSuccess, setPromoSuccess] = useState('');
 
   if (!isOpen) return null;
+
+  const t = TRANSLATIONS[lang];
+
+  const items: CartItem[] = rawItems.map(item => ({
+    ...item,
+    product: getTranslatedProduct(item.product, lang)
+  }));
 
   const FREE_SHIPPING_THRESHOLD = 400;
 
@@ -37,18 +47,15 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   const shippingCost = items.length === 0 ? 0 : isFreeShipping ? 0 : 30;
   const grandTotal = Math.max(0, subtotal - discount + shippingCost);
 
-  const missingForFreeShipping = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
-  const freeShippingProgress = Math.min(100, (subtotal / FREE_SHIPPING_THRESHOLD) * 100);
-
   const handleApplyPromo = (e: React.FormEvent) => {
     e.preventDefault();
     const code = promoCode.trim().toUpperCase();
     if (code === 'AZAG10' || code === 'KLAIM10' || code === 'ETE2026') {
       setDiscountPercent(10);
-      setPromoSuccess('Code promo -10% appliqué avec succès !');
+      setPromoSuccess(lang === 'ar' ? 'تم تطبيق خصم 10% بنجاح!' : 'Code promo -10% appliqué avec succès !');
       setPromoError('');
     } else {
-      setPromoError('Code invalide (Essayez AZAG10)');
+      setPromoError(lang === 'ar' ? 'رمز غير صالح (جرب AZAG10)' : 'Code invalide (Essayez AZAG10)');
       setPromoSuccess('');
     }
   };
@@ -61,7 +68,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
           <div className="flex items-center gap-2">
             <ShoppingBag className="w-5 h-5 text-[#2C2118]" />
             <h2 className="font-serif text-xl font-bold text-[#2C2118]">
-              Votre Panier ({items.reduce((acc, i) => acc + i.quantity, 0)})
+              {t.cartTitle} ({items.reduce((acc, i) => acc + i.quantity, 0)})
             </h2>
           </div>
           <button
@@ -77,9 +84,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
           <div className="flex items-center justify-between text-xs font-bold text-emerald-800">
             <span className="flex items-center gap-2">
               <Truck className="w-4 h-4 text-emerald-600" />
-              <span>🚚 Livraison 100% GRATUITE partout au Maroc</span>
+              <span>{t.freeShipping}</span>
             </span>
-            <span className="text-[10px] bg-emerald-200 text-emerald-800 px-2 py-0.5 rounded-full font-extrabold uppercase">Offerte</span>
           </div>
         </div>
 
@@ -90,15 +96,15 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               <div className="w-20 h-20 bg-[#F4EFEB] rounded-full flex items-center justify-center mx-auto text-[#8C7662]">
                 <ShoppingBag className="w-10 h-10" />
               </div>
-              <h3 className="font-serif text-lg font-bold text-[#2C2118]">Votre panier est vide</h3>
+              <h3 className="font-serif text-lg font-bold text-[#2C2118]">{t.cartEmpty}</h3>
               <p className="text-xs text-[#7C6E65] max-w-xs mx-auto">
-                Parcourez nos paires de chaussures en cuir véritable et profitez du paiement à la livraison.
+                {t.cartEmptyDesc}
               </p>
               <button
                 onClick={onClose}
                 className="bg-[#2C2118] text-[#D4A373] font-bold text-xs px-6 py-3 rounded-xl hover:bg-[#3D3028] transition-colors"
               >
-                Découvrir la Collection
+                {t.continueShopping}
               </button>
             </div>
           ) : (
@@ -128,7 +134,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
                     <div className="flex items-center gap-2 mt-1 text-xs text-[#7C6E65]">
                       <span className="bg-[#F4EFEB] px-2 py-0.5 rounded text-[#2C2118] font-bold">
-                        Pointure {item.selectedSize}
+                        {t.selectSize} {item.selectedSize}
                       </span>
                       <span>•</span>
                       <span>{item.selectedColor.name}</span>
@@ -169,20 +175,20 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
             {/* Promo code form */}
             <form onSubmit={handleApplyPromo} className="flex gap-2">
               <div className="relative flex-1">
-                <Tag className="w-4 h-4 text-[#8C7662] absolute left-3 top-2.5" />
+                <Tag className="w-4 h-4 text-[#8C7662] absolute left-3 rtl:left-auto rtl:right-3 top-2.5" />
                 <input
                   type="text"
-                  placeholder="Code promo (ex: AZAG10)"
+                  placeholder={lang === 'ar' ? 'رمز التخفيض (مثال: AZAG10)' : 'Code promo (ex: AZAG10)'}
                   value={promoCode}
                   onChange={(e) => setPromoCode(e.target.value)}
-                  className="w-full text-xs pl-9 pr-3 py-2 border border-[#E8E2D9] rounded-xl focus:outline-hidden focus:ring-1 focus:ring-[#2C2118] bg-white text-[#2C2118]"
+                  className="w-full text-xs pl-9 rtl:pl-3 rtl:pr-9 pr-3 py-2 border border-[#E8E2D9] rounded-xl focus:outline-hidden focus:ring-1 focus:ring-[#2C2118] bg-white text-[#2C2118]"
                 />
               </div>
               <button
                 type="submit"
                 className="bg-[#2C2118] text-[#D4A373] text-xs font-bold px-4 py-2 rounded-xl hover:bg-[#3D3028] transition-colors"
               >
-                Appliquer
+                {lang === 'ar' ? 'تطبيق' : 'Appliquer'}
               </button>
             </form>
 
@@ -192,7 +198,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
             {/* Calculations Breakdown */}
             <div className="space-y-1.5 text-xs text-[#7C6E65] pt-2 border-t border-[#E8E2D9]">
               <div className="flex justify-between">
-                <span>Sous-total</span>
+                <span>{t.subtotal}</span>
                 <span className="font-bold text-[#2C2118]">{formatPrice(subtotal, currency)}</span>
               </div>
 
@@ -204,12 +210,12 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               )}
 
               <div className="flex justify-between">
-                <span>Frais de livraison Maroc</span>
-                <span className="font-extrabold text-emerald-700">GRATUITE (0 DH)</span>
+                <span>{t.shippingFee}</span>
+                <span className="font-extrabold text-emerald-700">{t.freeShippingText}</span>
               </div>
 
               <div className="flex justify-between text-base font-black text-[#2C2118] pt-2 border-t border-[#D4A373]/40">
-                <span>Total à payer</span>
+                <span>{t.totalToPay}</span>
                 <span className="text-[#8C5628]">{formatPrice(grandTotal, currency)}</span>
               </div>
             </div>
@@ -223,13 +229,13 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               className="w-full bg-[#D4A373] text-[#2C2118] font-black py-4 px-6 rounded-2xl hover:bg-[#C08552] transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl group"
             >
               <Truck className="w-5 h-5" />
-              <span>Commander en 1-Clic (Paiement à la Livraison)</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <span>{t.checkoutBtn}</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform rtl:rotate-180" />
             </button>
 
             <div className="flex items-center justify-center gap-2 text-[11px] text-[#7C6E65] font-medium">
               <ShieldCheck className="w-4 h-4 text-emerald-600" />
-              <span>Paiement sécurisé en espèces au livreur après réception</span>
+              <span>{t.codBadge}</span>
             </div>
           </div>
         )}

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Heart, Star, Eye, ShoppingBag, Check } from 'lucide-react';
 import { Product, ProductColor } from '../types';
 import { Currency, formatPrice } from '../utils/format';
+import { Language, TRANSLATIONS, getTranslatedProduct } from '../utils/i18n';
 
 interface ProductCardProps {
   product: Product;
@@ -10,16 +11,21 @@ interface ProductCardProps {
   onToggleWishlist: (product: Product) => void;
   onQuickView: (product: Product) => void;
   onQuickAddToCart: (product: Product, size: number, color: ProductColor) => void;
+  lang?: Language;
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({
-  product,
+  product: rawProduct,
   currency,
   isWishlisted,
   onToggleWishlist,
   onQuickView,
-  onQuickAddToCart
+  onQuickAddToCart,
+  lang = 'fr'
 }) => {
+  const product = getTranslatedProduct(rawProduct, lang);
+  const t = TRANSLATIONS[lang];
+
   const [selectedColor, setSelectedColor] = useState<ProductColor>(product.colors[0] || { name: 'Standard', hex: '#000', image: product.mainImage });
   const [isHovered, setIsHovered] = useState(false);
   const [addedSize, setAddedSize] = useState<number | null>(null);
@@ -49,7 +55,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         />
 
         {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
+        <div className="absolute top-3 left-3 rtl:left-auto rtl:right-3 flex flex-col gap-1.5 z-10">
           {product.discountBadge && (
             <span className="bg-rose-600 text-white text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-xs">
               {product.discountBadge}
@@ -57,12 +63,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           )}
           {product.isBestSeller && !product.discountBadge && (
             <span className="bg-[#D4A373] text-[#2C2118] text-[11px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-xs">
-              Best-Seller
+              {t.bestsellerBadge}
             </span>
           )}
           {product.isNew && (
             <span className="bg-[#2C2118] text-[#D4A373] text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-xs">
-              Nouveau
+              {t.newBadge}
             </span>
           )}
         </div>
@@ -73,13 +79,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             e.stopPropagation();
             onToggleWishlist(product);
           }}
-          className={`absolute top-3 right-3 p-2.5 rounded-full transition-all duration-200 z-10 shadow-sm ${
+          className={`absolute top-3 right-3 rtl:right-auto rtl:left-3 p-2.5 rounded-full transition-all duration-200 z-10 shadow-sm ${
             isWishlisted
               ? 'bg-rose-50 text-rose-600 shadow-md'
               : 'bg-white/80 text-[#3D3028] hover:bg-white hover:text-[#2C2118] hover:scale-110'
           }`}
-          aria-label="Ajouter aux favoris"
-          title="Ajouter aux favoris"
+          aria-label={t.wishlist}
+          title={t.wishlist}
         >
           <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-rose-500 text-rose-500' : ''}`} />
         </button>
@@ -94,7 +100,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             className="w-full bg-white/95 backdrop-blur-md text-[#2C2118] font-bold text-xs py-2.5 px-4 rounded-xl shadow-lg hover:bg-[#2C2118] hover:text-white transition-all flex items-center justify-center gap-2"
           >
             <Eye className="w-4 h-4 text-[#D4A373]" />
-            Aperçu Rapide
+            {t.viewDetails}
           </button>
         </div>
       </div>
@@ -119,7 +125,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                   title={color.name}
                 />
               ))}
-              <span className="text-[11px] text-[#7C6E65] font-medium ml-1">
+              <span className="text-[11px] text-[#7C6E65] font-medium ml-1 rtl:ml-0 rtl:mr-1">
                 {selectedColor.name}
               </span>
             </div>
@@ -141,9 +147,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <div className="flex items-center gap-1.5 mt-2">
             <div className="flex items-center text-[#D4A373]">
               <Star className="w-3.5 h-3.5 fill-[#D4A373]" />
-              <span className="text-xs font-bold text-[#2C2118] ml-1">{product.rating}</span>
+              <span className="text-xs font-bold text-[#2C2118] mx-1">{product.rating}</span>
             </div>
-            <span className="text-[11px] text-[#7C6E65]">({product.reviewsCount} avis)</span>
+            <span className="text-[11px] text-[#7C6E65]">({product.reviewsCount} {lang === 'ar' ? 'تقييم' : 'avis'})</span>
           </div>
         </div>
 
@@ -163,10 +169,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           {/* Quick Add Size Buttons */}
           <div>
             <div className="text-[10px] font-bold text-[#8C7662] uppercase tracking-wider mb-1 flex justify-between items-center">
-              <span>Ajout rapide pointure</span>
+              <span>{lang === 'ar' ? 'إضافة مقاس سريع' : 'Ajout rapide pointure'}</span>
               {addedSize && (
                 <span className="text-emerald-700 font-extrabold flex items-center gap-1">
-                  <Check className="w-3 h-3" /> Ajouté ({addedSize})
+                  <Check className="w-3 h-3" /> {lang === 'ar' ? `تمت الإضافة (${addedSize})` : `Ajouté (${addedSize})`}
                 </span>
               )}
             </div>
@@ -181,7 +187,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                       ? 'bg-emerald-600 text-white border-emerald-600'
                       : 'bg-[#F4EFEB] text-[#3D3028] border-[#E8E2D9] hover:bg-[#2C2118] hover:text-[#D4A373] hover:border-[#2C2118]'
                   }`}
-                  title={`Ajouter au panier en pointure ${size}`}
+                  title={`${t.addToCart} (${size})`}
                 >
                   {size}
                 </button>

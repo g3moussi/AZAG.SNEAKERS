@@ -1,13 +1,17 @@
 import React from 'react';
 import { X, Ruler, Footprints, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { Language, TRANSLATIONS } from '../utils/i18n';
 
 interface SizeGuideModalProps {
   isOpen: boolean;
   onClose: () => void;
+  lang?: Language;
 }
 
-export const SizeGuideModal: React.FC<SizeGuideModalProps> = ({ isOpen, onClose }) => {
+export const SizeGuideModal: React.FC<SizeGuideModalProps> = ({ isOpen, onClose, lang = 'fr' }) => {
   if (!isOpen) return null;
+
+  const t = TRANSLATIONS[lang];
 
   const sizeChart = [
     { eu: 36, cm: '23.0 cm', us: '5.5', uk: '3.5' },
@@ -31,12 +35,12 @@ export const SizeGuideModal: React.FC<SizeGuideModalProps> = ({ isOpen, onClose 
             onClick={onClose}
             className="flex items-center gap-1.5 text-xs font-bold text-stone-700 hover:text-stone-900 bg-white hover:bg-stone-100 px-3 py-1.5 rounded-xl border border-stone-200 transition-colors"
           >
-            <ArrowLeft className="w-4 h-4 text-amber-700" />
-            <span>Retour</span>
+            <ArrowLeft className="w-4 h-4 text-amber-700 rtl:rotate-180" />
+            <span>{lang === 'ar' ? 'رجوع' : 'Retour'}</span>
           </button>
 
           <span className="text-xs font-bold text-stone-800 uppercase tracking-wider">
-            Guide des pointures
+            {t.sizeGuide}
           </span>
 
           <button
@@ -57,18 +61,18 @@ export const SizeGuideModal: React.FC<SizeGuideModalProps> = ({ isOpen, onClose 
             <Ruler className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="font-serif text-2xl font-bold text-stone-900">Guide des Pointures AZAG</h3>
-            <p className="text-xs text-stone-500">Trouvez votre pointure idéale en centimètres</p>
+            <h3 className="font-serif text-2xl font-bold text-stone-900">{t.sizeGuide} AZAG</h3>
+            <p className="text-xs text-stone-500">{lang === 'ar' ? 'اعثر على مقاسك المثالي بالسنتيمترات' : 'Trouvez votre pointure idéale en centimètres'}</p>
           </div>
         </div>
 
         {/* Size chart table */}
         <div className="overflow-x-auto rounded-2xl border border-stone-200 mb-6">
-          <table className="w-full text-xs text-left">
+          <table className="w-full text-xs text-start">
             <thead className="bg-stone-900 text-white uppercase font-bold text-[10px] tracking-wider">
               <tr>
                 <th className="p-3">EU</th>
-                <th className="p-3">Longueur Pied (CM)</th>
+                <th className="p-3">{lang === 'ar' ? 'طول القدم (سم)' : 'Longueur Pied (CM)'}</th>
                 <th className="p-3">US</th>
                 <th className="p-3">UK</th>
               </tr>
@@ -88,12 +92,12 @@ export const SizeGuideModal: React.FC<SizeGuideModalProps> = ({ isOpen, onClose 
 
         <div className="bg-stone-50 p-4 rounded-2xl border border-stone-200 text-xs text-stone-600 space-y-2">
           <h4 className="font-bold text-stone-900 flex items-center gap-1.5">
-            <Footprints className="w-4 h-4 text-amber-600" /> Conseil de mesure :
+            <Footprints className="w-4 h-4 text-amber-600" /> {lang === 'ar' ? 'نصيحة القياس:' : 'Conseil de mesure :'}
           </h4>
-          <p>Posez votre pied nu à plat sur une feuille de papier, faites un trait au bout du talon et un au bout du plus grand orteil. Mesurez la distance en cm.</p>
+          <p>{lang === 'ar' ? 'ضع قدمك على ورقة، ارسم خطاً عند الكعب وخطاً عند أطول أصبع ثم قس المسافة بالسنتيمتر.' : 'Posez votre pied nu à plat sur une feuille de papier, faites un trait au bout du talon et un au bout du plus grand orteil. Mesurez la distance en cm.'}</p>
           <div className="flex items-center gap-2 text-emerald-700 font-bold pt-1">
-            <CheckCircle2 className="w-4 h-4" />
-            <span>Nos chaussures et sandales taillent normalement. En cas d'hésitation entre deux pointures, nous recommandons la plus grande.</span>
+            <CheckCircle2 className="w-4 h-4 shrink-0" />
+            <span>{lang === 'ar' ? 'أحذيتنا تأتي بمقاسات معيارية. في حال التردد بين مقاسين، نوصي بالمقاس الأكبر.' : "Nos chaussures et sandales taillent normalement. En cas d'hésitation entre deux pointures, nous recommandons la plus grande."}</span>
           </div>
         </div>
       </div>

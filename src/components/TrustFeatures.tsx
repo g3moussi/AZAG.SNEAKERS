@@ -1,27 +1,34 @@
 import React from 'react';
 import { Award, Truck, ShieldCheck, RefreshCw } from 'lucide-react';
+import { Language, TRANSLATIONS } from '../utils/i18n';
 
-export const TrustFeatures: React.FC = () => {
+interface TrustFeaturesProps {
+  lang?: Language;
+}
+
+export const TrustFeatures: React.FC<TrustFeaturesProps> = ({ lang = 'fr' }) => {
+  const t = TRANSLATIONS[lang];
+
   const features = [
     {
       icon: Award,
-      title: '100% Cuir Véritable',
-      desc: 'Cuir de veau d’exception façonné par des maîtres artisans marocains.'
+      title: t.trustQualityTitle,
+      desc: t.trustQualityDesc
     },
     {
       icon: Truck,
-      title: 'Livraison GRATUITE 🇲🇦',
-      desc: 'Livraison 100% offerte partout au Maroc en 24h à 48h.'
+      title: t.trustFreeDeliveryTitle,
+      desc: t.trustFreeDeliveryDesc
     },
     {
       icon: ShieldCheck,
-      title: 'Paiement à la Livraison',
-      desc: 'Commandez en toute confiance et payez en espèces à la réception.'
+      title: t.trustCodTitle,
+      desc: t.trustCodDesc
     },
     {
       icon: RefreshCw,
-      title: 'Échange Gratuit 7j/7',
-      desc: 'Pointure trop petite ou trop grande ? Échange direct sans frais.'
+      title: t.trustExchangeTitle,
+      desc: t.trustExchangeDesc
     }
   ];
 

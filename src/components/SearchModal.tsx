@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Search, X, ShoppingBag, ArrowRight } from 'lucide-react';
 import { Product } from '../types';
 import { Currency, formatPrice } from '../utils/format';
+import { Language, TRANSLATIONS, getTranslatedProduct } from '../utils/i18n';
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -9,20 +10,27 @@ interface SearchModalProps {
   products: Product[];
   currency: Currency;
   onSelectProduct: (product: Product) => void;
+  lang?: Language;
 }
 
 export const SearchModal: React.FC<SearchModalProps> = ({
   isOpen,
   onClose,
-  products,
+  products: rawProducts,
   currency,
-  onSelectProduct
+  onSelectProduct,
+  lang = 'fr'
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
   if (!isOpen) return null;
 
-  const popularTags = ['Camel', 'Mules', 'Cuir', 'Compensée', 'Dorée', 'Plates'];
+  const t = TRANSLATIONS[lang];
+  const products = rawProducts.map(p => getTranslatedProduct(p, lang));
+
+  const popularTags = lang === 'ar' 
+    ? ['جلد', 'صندل', 'كعب', 'أسود', 'أسود']
+    : ['Camel', 'Mules', 'Cuir', 'Compensée', 'Dorée', 'Plates'];
 
   const filteredProducts = products.filter((p) => {
     const query = searchTerm.toLowerCase();
@@ -47,7 +55,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
           <input
             type="text"
             autoFocus
-            placeholder="Rechercher une sandale, mule, couleur ou matière (ex: Camel, Cuir...)..."
+            placeholder={t.searchPlaceholder}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full text-sm bg-transparent focus:outline-hidden text-[#2C2118] font-medium placeholder-[#8C7662]"
@@ -64,7 +72,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
 
         {/* Popular Tags */}
         <div className="px-6 py-3 bg-[#F4EFEB] border-b border-[#E8E2D9] flex items-center gap-2 overflow-x-auto">
-          <span className="text-[11px] font-bold text-[#8C7662] uppercase tracking-wider shrink-0">Popular:</span>
+          <span className="text-[11px] font-bold text-[#8C7662] uppercase tracking-wider shrink-0">{lang === 'ar' ? 'الأكثر بحثاً:' : 'Popular:'}</span>
           {popularTags.map((tag) => (
             <button
               key={tag}
@@ -80,8 +88,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
         <div className="max-h-96 overflow-y-auto p-6 space-y-3">
           {filteredProducts.length === 0 ? (
             <div className="py-12 text-center text-[#7C6E65] space-y-2">
-              <p className="font-semibold text-sm">Aucun produit ne correspond à "{searchTerm}"</p>
-              <p className="text-xs text-[#8C7662]">Essayez avec un autre mot-clé comme "Mule", "Cuir" ou "Pointure".</p>
+              <p className="font-semibold text-sm">{t.noResults}</p>
             </div>
           ) : (
             filteredProducts.map((product) => (
@@ -119,8 +126,8 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2 text-[#8C7662] group-hover:text-[#2C2118] transition-colors">
-                  <span className="text-xs font-bold hidden sm:inline">Voir</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <span className="text-xs font-bold hidden sm:inline">{t.quickViewBtn}</span>
+                  <ArrowRight className="w-4 h-4 rtl:rotate-180" />
                 </div>
               </div>
             ))

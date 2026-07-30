@@ -3,6 +3,7 @@ import { X, Truck, CheckCircle2, ShieldCheck, MapPin, Phone, User, ShoppingBag, 
 import { CartItem, Product, ProductColor } from '../types';
 import { MOROCCAN_CITIES } from '../data/products';
 import { Currency, formatPrice } from '../utils/format';
+import { Language, TRANSLATIONS, getTranslatedProduct } from '../utils/i18n';
 
 interface CODCheckoutModalProps {
   isOpen: boolean;
@@ -16,6 +17,7 @@ interface CODCheckoutModalProps {
   } | null;
   currency: Currency;
   onOrderSuccess: () => void;
+  lang?: Language;
 }
 
 export const CODCheckoutModal: React.FC<CODCheckoutModalProps> = ({
@@ -24,9 +26,12 @@ export const CODCheckoutModal: React.FC<CODCheckoutModalProps> = ({
   items,
   directProduct,
   currency,
-  onOrderSuccess
+  onOrderSuccess,
+  lang = 'fr'
 }) => {
   if (!isOpen) return null;
+
+  const t = TRANSLATIONS[lang];
 
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
@@ -37,9 +42,14 @@ export const CODCheckoutModal: React.FC<CODCheckoutModalProps> = ({
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderId, setOrderId] = useState('');
 
-  const checkoutItems: CartItem[] = directProduct
+  const rawCheckoutItems: CartItem[] = directProduct
     ? [{ product: directProduct.product, selectedSize: directProduct.size, selectedColor: directProduct.color, quantity: directProduct.quantity }]
     : items;
+
+  const checkoutItems: CartItem[] = rawCheckoutItems.map(item => ({
+    ...item,
+    product: getTranslatedProduct(item.product, lang)
+  }));
 
   const subtotal = checkoutItems.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
   const isFreeShipping = subtotal >= 400;
@@ -72,20 +82,20 @@ export const CODCheckoutModal: React.FC<CODCheckoutModalProps> = ({
     const itemsText = checkoutItems.map((item, idx) => {
       const rawImg = item.selectedColor.image || item.product.mainImage;
       const imgUrl = rawImg.startsWith('http') ? rawImg : `${window.location.origin}${rawImg}`;
-      return `${checkoutItems.length > 1 ? `${idx + 1}. ` : ''}*Modèle:* ${item.product.name}\n   • *Couleur:* ${item.selectedColor.name}\n   • *Pointure:* ${item.selectedSize}\n   • *Quantité:* ${item.quantity}\n   • *Prix:* ${formatPrice(item.product.price * item.quantity, currency)}\n   • *Photo du modèle:* ${imgUrl}`;
+      return `${checkoutItems.length > 1 ? `${idx + 1}. ` : ''}*${lang === 'ar' ? 'الموديل' : 'Modèle'}:* ${item.product.name}\n   • *${lang === 'ar' ? 'اللون' : 'Couleur'}:* ${item.selectedColor.name}\n   • *${lang === 'ar' ? 'المقاس' : 'Pointure'}:* ${item.selectedSize}\n   • *${lang === 'ar' ? 'الكمية' : 'Quantité'}:* ${item.quantity}\n   • *${lang === 'ar' ? 'الثمن' : 'Prix'}:* ${formatPrice(item.product.price * item.quantity, currency)}\n   • *${lang === 'ar' ? 'صورة الموديل' : 'Photo du modèle'}:* ${imgUrl}`;
     }).join('\n\n');
 
-    const message = `*NOUVELLE COMMANDE AZAG - PAIEMENT À LA LIVRAISON* 📦\n\n` +
-      `📌 *Code Commande:* ${code}\n\n` +
-      `👤 *INFORMATIONS CLIENT:*\n` +
-      `• *Nom & Prénom:* ${fullName}\n` +
-      `• *Téléphone:* ${phone}\n` +
-      `• *Ville:* ${city}\n` +
-      `• *Adresse:* ${address}` +
+    const message = `*${lang === 'ar' ? 'طلب جديد AZAG - الدفع عند الاستلام' : 'NOUVELLE COMMANDE AZAG - PAIEMENT À LA LIVRAISON'}* 📦\n\n` +
+      `📌 *${lang === 'ar' ? 'رمز الطلب' : 'Code Commande'}:* ${code}\n\n` +
+      `👤 *${lang === 'ar' ? 'معلومات الزبون' : 'INFORMATIONS CLIENT'}:*\n` +
+      `• *${t.fullNameLabel}:* ${fullName}\n` +
+      `• *${t.phoneLabel}:* ${phone}\n` +
+      `• *${t.cityLabel}:* ${city}\n` +
+      `• *${t.addressLabel}:* ${address}` +
       (notes ? `\n• *Notes:* ${notes}` : '') +
-      `\n\n👞 *DÉTAILS DU MODÈLE:*\n${itemsText}\n\n` +
-      `💰 *TOTAL À PAYER:* ${formatPrice(total, currency)} (${isFreeShipping ? 'Livraison GRATUITE' : 'Livraison 30 DH'})\n\n` +
-      `Bonjour AZAG, merci de confirmer la livraison de ma commande !`;
+      `\n\n👞 *${t.orderSummary}:*\n${itemsText}\n\n` +
+      `💰 *${t.totalToPay}:* ${formatPrice(total, currency)} (${isFreeShipping ? t.freeShippingText : '30 DH'})\n\n` +
+      `${lang === 'ar' ? 'مرحباً AZAG، يرجى تأكيد توصيل طلبي وشكراً !' : 'Bonjour AZAG, merci de confirmer la livraison de ma commande !'}`;
 
     return `https://wa.me/212752424260?text=${encodeURIComponent(message)}`;
   };
@@ -103,8 +113,8 @@ export const CODCheckoutModal: React.FC<CODCheckoutModalProps> = ({
             onClick={onClose}
             className="flex items-center gap-1.5 text-xs font-bold text-[#6B5A4E] hover:text-[#2C2118] bg-white hover:bg-[#F4EFEB] px-3.5 py-1.5 rounded-xl border border-[#E8E2D9] transition-colors shadow-2xs"
           >
-            <ArrowLeft className="w-4 h-4 text-[#8C5628]" />
-            <span>Retour aux achats</span>
+            <ArrowLeft className="w-4 h-4 text-[#8C5628] rtl:rotate-180" />
+            <span>{t.continueShopping}</span>
           </button>
 
           <span className="text-xs font-extrabold text-[#2C2118] uppercase tracking-wider hidden sm:inline-block">
@@ -114,8 +124,8 @@ export const CODCheckoutModal: React.FC<CODCheckoutModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            title="Fermer la fenêtre (X)"
-            aria-label="Fermer"
+            title={t.closeBtn}
+            aria-label={t.closeBtn}
             className="p-2 bg-[#F4EFEB] hover:bg-[#2C2118] hover:text-white rounded-full transition-colors flex items-center justify-center"
           >
             <X className="w-5 h-5 text-[#3D3028] hover:text-white" />
@@ -131,38 +141,29 @@ export const CODCheckoutModal: React.FC<CODCheckoutModalProps> = ({
 
             <div>
               <span className="text-xs font-bold tracking-widest text-emerald-700 uppercase bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-                Commande Confirmée 🎉
+                {t.orderSuccessTitle}
               </span>
               <h2 className="font-serif text-3xl font-bold text-[#2C2118] mt-3">
-                Merci {fullName} !
+                {lang === 'ar' ? `شكراً ${fullName}!` : `Merci ${fullName} !`}
               </h2>
               <p className="text-[#7C6E65] text-sm mt-1">
-                Votre commande <strong className="text-[#2C2118]">{orderId}</strong> a bien été enregistrée.
+                {t.orderSuccessDesc}
               </p>
             </div>
 
-            <div className="bg-[#FAF8F5] p-6 rounded-2xl border border-[#E8E2D9] text-left space-y-3 text-xs text-[#3D3028]">
+            <div className="bg-[#FAF8F5] p-6 rounded-2xl border border-[#E8E2D9] text-start space-y-3 text-xs text-[#3D3028]">
               <div className="flex justify-between border-b border-[#E8E2D9] pb-2">
-                <span className="font-semibold text-[#7C6E65]">Ville de livraison:</span>
+                <span className="font-semibold text-[#7C6E65]">{t.cityLabel}:</span>
                 <span className="font-bold text-[#2C2118]">{city}</span>
               </div>
               <div className="flex justify-between border-b border-[#E8E2D9] pb-2">
-                <span className="font-semibold text-[#7C6E65]">Téléphone:</span>
+                <span className="font-semibold text-[#7C6E65]">{t.phoneLabel}:</span>
                 <span className="font-bold text-[#2C2118]">{phone}</span>
               </div>
               <div className="flex justify-between border-b border-[#E8E2D9] pb-2">
-                <span className="font-semibold text-[#7C6E65]">Montant total à payer:</span>
+                <span className="font-semibold text-[#7C6E65]">{t.totalToPay}:</span>
                 <span className="font-black text-[#8C5628] text-sm">{formatPrice(total, currency)}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="font-semibold text-[#7C6E65]">Délai estimé:</span>
-                <span className="font-bold text-emerald-700">Livraison sous 24h à 48h</span>
-              </div>
-            </div>
-
-            <div className="p-4 bg-[#F5EBE6] rounded-2xl border border-[#E6CCB2] text-xs text-[#6B401D] flex items-center gap-3 text-left">
-              <Phone className="w-5 h-5 text-[#8C5628] shrink-0" />
-              <span>Notre agent vous contactera par téléphone ou WhatsApp sur le <strong>{phone}</strong> (+212 7 52 42 42 60) pour confirmer l'heure exacte de livraison.</span>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3">
@@ -173,14 +174,14 @@ export const CODCheckoutModal: React.FC<CODCheckoutModalProps> = ({
                 className="flex-1 bg-emerald-600 text-white font-bold py-3.5 rounded-2xl hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2 text-xs uppercase tracking-wider shadow-md"
               >
                 <Phone className="w-4 h-4" />
-                <span>Envoyer ma commande sur WhatsApp</span>
+                <span>{t.openWhatsAppBtn}</span>
               </a>
 
               <button
                 onClick={onClose}
                 className="flex-1 bg-[#2C2118] text-[#D4A373] font-bold py-3.5 rounded-2xl hover:bg-[#3D3028] transition-colors text-xs uppercase tracking-wider"
               >
-                Continuer les achats
+                {t.continueShopping}
               </button>
             </div>
           </div>
@@ -193,10 +194,10 @@ export const CODCheckoutModal: React.FC<CODCheckoutModalProps> = ({
               </div>
               <div>
                 <h2 className="font-serif text-2xl font-bold text-[#2C2118]">
-                  Commande Express (Paiement à la Livraison)
+                  {t.codModalTitle}
                 </h2>
                 <p className="text-xs text-[#7C6E65]">
-                  Remplissez vos coordonnées. Aucun paiement par carte bancaire requis.
+                  {t.codModalSubtitle}
                 </p>
               </div>
             </div>
@@ -204,7 +205,7 @@ export const CODCheckoutModal: React.FC<CODCheckoutModalProps> = ({
             {/* Order Items Preview */}
             <div className="bg-[#FAF8F5] p-4 rounded-2xl border border-[#E8E2D9] mb-6 space-y-3">
               <span className="text-xs font-bold text-[#8C7662] uppercase tracking-wider block">
-                Articles commandés ({checkoutItems.reduce((acc, i) => acc + i.quantity, 0)})
+                {t.orderSummary} ({checkoutItems.reduce((acc, i) => acc + i.quantity, 0)})
               </span>
               <div className="max-h-36 overflow-y-auto space-y-2 pr-1">
                 {checkoutItems.map((item, idx) => (
@@ -218,7 +219,7 @@ export const CODCheckoutModal: React.FC<CODCheckoutModalProps> = ({
                       />
                       <div>
                         <h4 className="font-bold text-[#2C2118] line-clamp-1">{item.product.name}</h4>
-                        <span className="text-[#7C6E65]">Pointure {item.selectedSize} • {item.selectedColor.name} x{item.quantity}</span>
+                        <span className="text-[#7C6E65]">{t.selectSize} {item.selectedSize} • {item.selectedColor.name} x{item.quantity}</span>
                       </div>
                     </div>
                     <span className="font-extrabold text-[#2C2118]">{formatPrice(item.product.price * item.quantity, currency)}</span>
@@ -227,7 +228,7 @@ export const CODCheckoutModal: React.FC<CODCheckoutModalProps> = ({
               </div>
 
               <div className="pt-2 border-t border-[#E8E2D9] flex justify-between items-center text-xs font-bold">
-                <span className="text-[#7C6E65]">Total (Livraison inclus):</span>
+                <span className="text-[#7C6E65]">{t.cartTotal}:</span>
                 <span className="text-base text-[#8C5628] font-black">{formatPrice(total, currency)}</span>
               </div>
             </div>
@@ -237,34 +238,34 @@ export const CODCheckoutModal: React.FC<CODCheckoutModalProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-[#3D3028] uppercase tracking-wider mb-1">
-                    Nom & Prénom <span className="text-rose-600">*</span>
+                    {t.fullNameLabel} <span className="text-rose-600">*</span>
                   </label>
                   <div className="relative">
-                    <User className="w-4 h-4 text-[#8C7662] absolute left-3 top-3" />
+                    <User className="w-4 h-4 text-[#8C7662] absolute left-3 rtl:left-auto rtl:right-3 top-3" />
                     <input
                       type="text"
                       required
-                      placeholder="Ex: Salma Benani"
+                      placeholder={t.fullNamePlaceholder}
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
-                      className="w-full text-xs pl-9 pr-3 py-2.5 border border-[#E8E2D9] rounded-xl focus:ring-2 focus:ring-[#2C2118] focus:outline-hidden bg-white text-[#2C2118]"
+                      className="w-full text-xs pl-9 rtl:pl-3 rtl:pr-9 pr-3 py-2.5 border border-[#E8E2D9] rounded-xl focus:ring-2 focus:ring-[#2C2118] focus:outline-hidden bg-white text-[#2C2118]"
                     />
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-[#3D3028] uppercase tracking-wider mb-1">
-                    Numéro de Téléphone / WhatsApp <span className="text-rose-600">*</span>
+                    {t.phoneLabel} <span className="text-rose-600">*</span>
                   </label>
                   <div className="relative">
-                    <Phone className="w-4 h-4 text-[#8C7662] absolute left-3 top-3" />
+                    <Phone className="w-4 h-4 text-[#8C7662] absolute left-3 rtl:left-auto rtl:right-3 top-3" />
                     <input
                       type="tel"
                       required
-                      placeholder="Ex: 06 61 23 45 67"
+                      placeholder={t.phonePlaceholder}
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      className="w-full text-xs pl-9 pr-3 py-2.5 border border-[#E8E2D9] rounded-xl focus:ring-2 focus:ring-[#2C2118] focus:outline-hidden bg-white text-[#2C2118]"
+                      className="w-full text-xs pl-9 rtl:pl-3 rtl:pr-9 pr-3 py-2.5 border border-[#E8E2D9] rounded-xl focus:ring-2 focus:ring-[#2C2118] focus:outline-hidden bg-white text-[#2C2118]"
                     />
                   </div>
                 </div>
@@ -272,14 +273,14 @@ export const CODCheckoutModal: React.FC<CODCheckoutModalProps> = ({
 
               <div>
                 <label className="block text-xs font-bold text-[#3D3028] uppercase tracking-wider mb-1">
-                  Ville de Livraison (Maroc) <span className="text-rose-600">*</span>
+                  {t.cityLabel} <span className="text-rose-600">*</span>
                 </label>
                 <div className="relative">
-                  <MapPin className="w-4 h-4 text-[#8C7662] absolute left-3 top-3" />
+                  <MapPin className="w-4 h-4 text-[#8C7662] absolute left-3 rtl:left-auto rtl:right-3 top-3" />
                   <select
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
-                    className="w-full text-xs pl-9 pr-8 py-2.5 border border-[#E8E2D9] rounded-xl focus:ring-2 focus:ring-[#2C2118] focus:outline-hidden bg-white text-[#2C2118] appearance-none cursor-pointer"
+                    className="w-full text-xs pl-9 rtl:pl-3 rtl:pr-9 pr-8 border border-[#E8E2D9] rounded-xl focus:ring-2 focus:ring-[#2C2118] focus:outline-hidden bg-white text-[#2C2118] appearance-none cursor-pointer"
                   >
                     {MOROCCAN_CITIES.map((c) => (
                       <option key={c} value={c}>
@@ -292,12 +293,12 @@ export const CODCheckoutModal: React.FC<CODCheckoutModalProps> = ({
 
               <div>
                 <label className="block text-xs font-bold text-[#3D3028] uppercase tracking-wider mb-1">
-                  Adresse de Livraison Exacte <span className="text-rose-600">*</span>
+                  {t.addressLabel} <span className="text-rose-600">*</span>
                 </label>
                 <textarea
                   required
                   rows={2}
-                  placeholder="Quartier, Rue, N° d'appartement ou résidence..."
+                  placeholder={t.addressPlaceholder}
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   className="w-full text-xs p-3 border border-[#E8E2D9] rounded-xl focus:ring-2 focus:ring-[#2C2118] focus:outline-hidden bg-white text-[#2C2118]"
@@ -310,11 +311,11 @@ export const CODCheckoutModal: React.FC<CODCheckoutModalProps> = ({
                 className="w-full bg-[#2C2118] text-[#D4A373] font-extrabold py-4 px-6 rounded-2xl hover:bg-[#3D3028] transition-all shadow-xl flex items-center justify-center gap-2 text-sm uppercase tracking-wider cursor-pointer"
               >
                 {isSubmitting ? (
-                  <span>Validation en cours...</span>
+                  <span>{t.submittingOrder}</span>
                 ) : (
                   <>
                     <ShieldCheck className="w-5 h-5 text-[#D4A373]" />
-                    <span>Confirmer la commande • {formatPrice(total, currency)}</span>
+                    <span>{t.confirmOrderBtn} • {formatPrice(total, currency)}</span>
                   </>
                 )}
               </button>
@@ -324,12 +325,12 @@ export const CODCheckoutModal: React.FC<CODCheckoutModalProps> = ({
                 onClick={onClose}
                 className="w-full py-2.5 text-xs text-[#7C6E65] hover:text-[#2C2118] font-bold transition-colors flex items-center justify-center gap-1.5"
               >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Annuler et retourner à la boutique</span>
+                <ArrowLeft className="w-3.5 h-3.5 rtl:rotate-180" />
+                <span>{t.continueShopping}</span>
               </button>
 
               <p className="text-[11px] text-center text-[#7C6E65] font-medium">
-                Paiement 100% en espèces au livreur lors de la livraison à domicile.
+                {t.codBadge}
               </p>
             </form>
           </div>

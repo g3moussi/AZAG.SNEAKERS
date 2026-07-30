@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Search, ShoppingBag, Heart, Menu, X, ChevronDown, Truck, ShieldCheck, Sparkles } from 'lucide-react';
+import { Search, ShoppingBag, Heart, Menu, X, ChevronDown, Truck, ShieldCheck, Sparkles, Globe } from 'lucide-react';
 import { Currency } from '../utils/format';
 import { Logo } from './Logo';
+import { Language, TRANSLATIONS } from '../utils/i18n';
 
 interface NavbarProps {
   cartCount: number;
@@ -13,6 +14,8 @@ interface NavbarProps {
   onSelectCategory: (cat: string) => void;
   currency: Currency;
   onCurrencyChange: (c: Currency) => void;
+  lang: Language;
+  onLanguageChange: (lang: Language) => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -24,15 +27,18 @@ export const Navbar: React.FC<NavbarProps> = ({
   activeCategory,
   onSelectCategory,
   currency,
-  onCurrencyChange
+  onCurrencyChange,
+  lang,
+  onLanguageChange
 }) => {
   const [tickerIndex, setTickerIndex] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const t = TRANSLATIONS[lang];
 
   const announcements = [
-    { icon: Truck, text: "Livraison GRATUITE partout au Maroc 🇲🇦 🚚" },
-    { icon: ShieldCheck, text: "Paiement en espèces à la livraison (COD) & Échange gratuit 7j" },
-    { icon: Sparkles, text: "Nouvelle Collection Chaussures & Maroquinerie Cuir 2026" }
+    { icon: Truck, text: t.freeShipping },
+    { icon: ShieldCheck, text: `${t.codBadge} • ${t.returnsBadge}` },
+    { icon: Sparkles, text: t.announcement }
   ];
 
   useEffect(() => {
@@ -45,12 +51,12 @@ export const Navbar: React.FC<NavbarProps> = ({
   const CurrentIcon = announcements[tickerIndex].icon;
 
   const siteSections = [
-    { href: '#accueil', label: 'Accueil' },
-    { href: '#boutique', label: 'Chaussures & Sandales' },
-    { href: '#histoire', label: 'Notre Savoir-Faire' },
-    { href: '#avis', label: 'Avis Clients' },
-    { href: '#faq', label: 'FAQ & Aide' },
-    { href: '#contact', label: 'Showroom & Contact' }
+    { href: '#accueil', label: t.navHome },
+    { href: '#boutique', label: t.navProducts },
+    { href: '#histoire', label: t.navStory },
+    { href: '#avis', label: t.navReviews },
+    { href: '#faq', label: t.navFaq },
+    { href: '#contact', label: t.navContact }
   ];
 
   const handleNavClick = (href: string) => {
@@ -71,23 +77,43 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <header className="sticky top-0 z-40 bg-[#FAF8F5]/95 backdrop-blur-md shadow-xs transition-all border-b border-[#E8E2D9]">
       {/* Top Announcement Bar */}
-      <div className="bg-[#2C2118] text-[#FAF8F5] text-xs py-2 px-4 transition-colors">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex-1 flex justify-center items-center gap-2 font-medium tracking-wide">
+      <div className="bg-[#2C2118] text-[#FAF8F5] text-xs py-2 px-3 sm:px-4 transition-colors">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+          <div className="flex-1 flex justify-center sm:justify-start items-center gap-2 font-medium tracking-wide min-w-0">
             <CurrentIcon className="w-3.5 h-3.5 text-[#D4A373] shrink-0" />
-            <span className="truncate">{announcements[tickerIndex].text}</span>
+            <span className="truncate text-[11px] sm:text-xs">{announcements[tickerIndex].text}</span>
           </div>
 
-          <div className="hidden md:flex items-center gap-4 text-xs font-medium text-[#DDD3C7]">
-            <div className="flex items-center gap-1 cursor-pointer hover:text-white transition-colors">
+          <div className="flex items-center gap-2 sm:gap-4 text-xs font-medium text-[#DDD3C7] shrink-0">
+            <div className="hidden sm:flex items-center gap-1">
               <span>DH (MAD)</span>
-              <ChevronDown className="w-3 h-3" />
             </div>
-            <span>|</span>
-            <div className="flex items-center gap-1">
-              <span className="text-[#D4A373] font-bold">FR</span>
-              <span className="text-[#8C7662]">/</span>
-              <span className="hover:text-white cursor-pointer">AR</span>
+            <span className="hidden sm:inline">|</span>
+
+            {/* Language Switcher Buttons */}
+            <div className="flex items-center bg-[#3D3028] p-0.5 rounded-full border border-[#D4A373]/30">
+              <button
+                onClick={() => onLanguageChange('ar')}
+                className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold transition-all flex items-center gap-1 ${
+                  lang === 'ar'
+                    ? 'bg-[#D4A373] text-[#2C2118] shadow-xs'
+                    : 'text-[#DDD3C7] hover:text-white'
+                }`}
+                title="العربية"
+              >
+                <span>العربية</span>
+              </button>
+              <button
+                onClick={() => onLanguageChange('fr')}
+                className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold transition-all ${
+                  lang === 'fr'
+                    ? 'bg-[#D4A373] text-[#2C2118] shadow-xs'
+                    : 'text-[#DDD3C7] hover:text-white'
+                }`}
+                title="Français"
+              >
+                <span>FR</span>
+              </button>
             </div>
           </div>
         </div>
@@ -116,7 +142,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-6">
+          <nav className="hidden lg:flex items-center space-x-6 rtl:space-x-reverse">
             {siteSections.map((section) => (
               <button
                 key={section.href}
@@ -129,12 +155,12 @@ export const Navbar: React.FC<NavbarProps> = ({
           </nav>
 
           {/* Right Action Icons */}
-          <div className="flex items-center space-x-1.5 sm:space-x-4 shrink-0">
+          <div className="flex items-center space-x-1.5 sm:space-x-4 rtl:space-x-reverse shrink-0">
             <button
               onClick={onOpenSearch}
               className="p-1.5 sm:p-2 text-[#3D3028] hover:text-[#2C2118] hover:bg-[#F4EFEB] rounded-full transition-colors relative"
-              aria-label="Rechercher"
-              title="Rechercher"
+              aria-label={t.search}
+              title={t.search}
             >
               <Search className="w-5 h-5" />
             </button>
@@ -142,8 +168,8 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               onClick={onOpenWishlist}
               className="p-1.5 sm:p-2 text-[#3D3028] hover:text-[#2C2118] hover:bg-[#F4EFEB] rounded-full transition-colors relative"
-              aria-label="Favoris"
-              title="Favoris"
+              aria-label={t.wishlist}
+              title={t.wishlist}
             >
               <Heart className="w-5 h-5" />
               {wishlistCount > 0 && (
@@ -156,10 +182,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               onClick={onOpenCart}
               className="flex items-center gap-1.5 sm:gap-2 bg-[#2C2118] text-white px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full hover:bg-[#3D3028] transition-all shadow-xs hover:shadow-md group"
-              aria-label="Voir le panier"
+              aria-label={t.cart}
             >
               <ShoppingBag className="w-4 h-4 text-[#D4A373] group-hover:scale-110 transition-transform" />
-              <span className="hidden sm:inline text-xs font-semibold tracking-wider uppercase">Panier</span>
+              <span className="hidden sm:inline text-xs font-semibold tracking-wider uppercase">{t.cart}</span>
               <span className="bg-[#D4A373] text-[#2C2118] text-xs font-extrabold px-1.5 sm:px-2 py-0.5 rounded-full">
                 {cartCount}
               </span>
@@ -172,9 +198,9 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="bg-[#FAF8F5] border-t border-[#E8E2D9] px-4 py-3">
         <div className="max-w-md mx-auto flex items-center justify-center gap-3 sm:gap-4">
           {[
-            { id: 'homme', label: 'Homme' },
-            { id: 'femme', label: 'Femme' },
-            { id: 'enfant', label: 'Enfant' }
+            { id: 'homme', label: t.catHomme },
+            { id: 'femme', label: t.catFemme },
+            { id: 'enfant', label: t.catEnfant }
           ].map((cat) => {
             const isActive = activeCategory === cat.id;
             return (
@@ -201,7 +227,9 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
         <div className="lg:hidden border-t border-[#E8E2D9] bg-[#F4EFEB] px-4 pt-4 pb-6 space-y-2">
-          <p className="text-[11px] font-bold text-[#8C7662] uppercase tracking-widest px-2 mb-1">Navigation du Site</p>
+          <p className="text-[11px] font-bold text-[#8C7662] uppercase tracking-widest px-2 mb-1">
+            {lang === 'ar' ? 'قائمة التنقل' : 'Navigation du Site'}
+          </p>
           {siteSections.map((section) => (
             <button
               key={section.href}
@@ -209,14 +237,27 @@ export const Navbar: React.FC<NavbarProps> = ({
                 handleNavClick(section.href);
                 setMobileMenuOpen(false);
               }}
-              className="block w-full text-left px-3 py-2.5 rounded-lg text-sm font-bold text-[#2C2118] hover:bg-[#ECE5DD] transition-colors"
+              className="block w-full text-start px-3 py-2.5 rounded-lg text-sm font-bold text-[#2C2118] hover:bg-[#ECE5DD] transition-colors"
             >
               {section.label}
             </button>
           ))}
-          <div className="pt-4 border-t border-[#E8E2D9] text-xs text-[#7C6E65] flex justify-between px-2">
-            <span>Devise: <strong>DH Marocain (MAD)</strong></span>
-            <span>Support WhatsApp 7j/7</span>
+          <div className="pt-4 border-t border-[#E8E2D9] text-xs text-[#7C6E65] flex justify-between items-center px-2">
+            <span>{lang === 'ar' ? 'العملة: الدرهم المغربي (MAD)' : 'Devise: DH Marocain (MAD)'}</span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => onLanguageChange('ar')}
+                className={`px-2 py-1 rounded text-xs font-bold ${lang === 'ar' ? 'bg-[#2C2118] text-[#D4A373]' : 'bg-[#E8E2D9] text-[#3D3028]'}`}
+              >
+                العربية
+              </button>
+              <button
+                onClick={() => onLanguageChange('fr')}
+                className={`px-2 py-1 rounded text-xs font-bold ${lang === 'fr' ? 'bg-[#2C2118] text-[#D4A373]' : 'bg-[#E8E2D9] text-[#3D3028]'}`}
+              >
+                Français
+              </button>
+            </div>
           </div>
         </div>
       )}

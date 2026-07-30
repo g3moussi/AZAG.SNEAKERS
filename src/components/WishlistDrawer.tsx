@@ -2,6 +2,7 @@ import React from 'react';
 import { X, Heart, Trash2, ShoppingBag, Eye } from 'lucide-react';
 import { Product } from '../types';
 import { Currency, formatPrice } from '../utils/format';
+import { Language, TRANSLATIONS, getTranslatedProduct } from '../utils/i18n';
 
 interface WishlistDrawerProps {
   isOpen: boolean;
@@ -10,17 +11,22 @@ interface WishlistDrawerProps {
   currency: Currency;
   onRemoveWishlist: (product: Product) => void;
   onQuickView: (product: Product) => void;
+  lang?: Language;
 }
 
 export const WishlistDrawer: React.FC<WishlistDrawerProps> = ({
   isOpen,
   onClose,
-  items,
+  items: rawItems,
   currency,
   onRemoveWishlist,
-  onQuickView
+  onQuickView,
+  lang = 'fr'
 }) => {
   if (!isOpen) return null;
+
+  const t = TRANSLATIONS[lang];
+  const items = rawItems.map(p => getTranslatedProduct(p, lang));
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-[#2C2118]/60 backdrop-blur-xs flex justify-end animate-fadeIn">
@@ -29,7 +35,7 @@ export const WishlistDrawer: React.FC<WishlistDrawerProps> = ({
           <div className="flex items-center gap-2">
             <Heart className="w-5 h-5 text-rose-600 fill-rose-600" />
             <h2 className="font-serif text-xl font-bold text-[#2C2118]">
-              Mes Favoris ({items.length})
+              {t.wishlistTitle} ({items.length})
             </h2>
           </div>
           <button
@@ -46,9 +52,9 @@ export const WishlistDrawer: React.FC<WishlistDrawerProps> = ({
               <div className="w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center mx-auto text-rose-300">
                 <Heart className="w-10 h-10" />
               </div>
-              <h3 className="font-serif text-lg font-bold text-[#2C2118]">Aucun favori enregistré</h3>
+              <h3 className="font-serif text-lg font-bold text-[#2C2118]">{t.wishlistEmpty}</h3>
               <p className="text-xs text-[#7C6E65] max-w-xs mx-auto">
-                Cliquez sur l'icône cœur sur n'importe quel modèle pour l'ajouter à vos favoris.
+                {t.wishlistEmptyDesc}
               </p>
             </div>
           ) : (
@@ -78,7 +84,7 @@ export const WishlistDrawer: React.FC<WishlistDrawerProps> = ({
                       onClose();
                     }}
                     className="p-2 bg-[#2C2118] text-[#D4A373] rounded-xl hover:bg-[#3D3028] transition-colors"
-                    title="Voir les détails"
+                    title={t.quickViewBtn}
                   >
                     <Eye className="w-4 h-4" />
                   </button>
