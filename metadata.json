@@ -1,0 +1,6 @@
+{
+  "name": "AZAG - Chaussures & Sandales Cuir Maroc",
+  "description": "Maison AZAG Maroc - Chaussures, Mocassins, Sneakers Chic, Escarpins, Bottines et Sandales en cuir véritable. Artisanat d'exception & Paiement à la livraison au Maroc.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
