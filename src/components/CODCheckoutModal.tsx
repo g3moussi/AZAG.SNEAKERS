@@ -60,7 +60,13 @@ export const CODCheckoutModal: React.FC<CODCheckoutModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullName || !phone || !address) return;
+    const trimmedName = fullName.trim();
+    const trimmedPhone = phone.trim();
+    const trimmedCity = city.trim() || 'Casablanca';
+    const trimmedAddress = address.trim();
+    const trimmedNotes = notes.trim();
+
+    if (!trimmedName || !trimmedPhone || !trimmedAddress) return;
 
     setIsSubmitting(true);
     setSyncStatus('syncing');
@@ -104,46 +110,48 @@ export const CODCheckoutModal: React.FC<CODCheckoutModalProps> = ({
     const finalTotal = Number(total) || checkoutItems.reduce((acc, i) => acc + (Number(i.product.price) * Number(i.quantity)), 0);
 
     const customerObj = {
-      name: fullName,
-      fullName: fullName,
-      full_name: fullName,
-      customerName: fullName,
-      customer_name: fullName,
-      clientName: fullName,
-      client_name: fullName,
-      phone: phone,
-      phone_number: phone,
-      phoneNumber: phone,
-      telephone: phone,
-      tel: phone,
-      mobile: phone,
-      city: city,
-      ville: city,
-      address: address,
-      adresse: address,
-      shipping_address: address,
-      shippingAddress: address
+      name: trimmedName,
+      fullName: trimmedName,
+      full_name: trimmedName,
+      customerName: trimmedName,
+      customer_name: trimmedName,
+      clientName: trimmedName,
+      client_name: trimmedName,
+      buyerName: trimmedName,
+      buyer_name: trimmedName,
+      phone: trimmedPhone,
+      phone_number: trimmedPhone,
+      phoneNumber: trimmedPhone,
+      telephone: trimmedPhone,
+      tel: trimmedPhone,
+      mobile: trimmedPhone,
+      city: trimmedCity,
+      ville: trimmedCity,
+      address: trimmedAddress,
+      adresse: trimmedAddress,
+      shipping_address: trimmedAddress,
+      shippingAddress: trimmedAddress
     };
 
     const shippingObj = {
-      name: fullName,
-      fullName: fullName,
-      full_name: fullName,
-      customerName: fullName,
-      phone: phone,
-      phone_number: phone,
-      phoneNumber: phone,
-      telephone: phone,
-      city: city,
-      ville: city,
-      address: address,
-      address1: address,
-      adresse: address,
-      line1: address,
+      name: trimmedName,
+      fullName: trimmedName,
+      full_name: trimmedName,
+      customerName: trimmedName,
+      phone: trimmedPhone,
+      phone_number: trimmedPhone,
+      phoneNumber: trimmedPhone,
+      telephone: trimmedPhone,
+      city: trimmedCity,
+      ville: trimmedCity,
+      address: trimmedAddress,
+      address1: trimmedAddress,
+      adresse: trimmedAddress,
+      line1: trimmedAddress,
       country: 'Morocco'
     };
 
-    const orderData: any = {
+    const basePayload: any = {
       // Order ID variations
       orderId: generatedCode,
       order_id: generatedCode,
@@ -154,50 +162,50 @@ export const CODCheckoutModal: React.FC<CODCheckoutModalProps> = ({
       order_number: generatedCode,
 
       // Top-level Customer Name variations
-      fullName: fullName,
-      full_name: fullName,
-      customerName: fullName,
-      customer_name: fullName,
-      clientName: fullName,
-      client_name: fullName,
-      name: fullName,
-      client: fullName,
-      buyerName: fullName,
-      buyer_name: fullName,
-      userName: fullName,
-      user_name: fullName,
-      contactName: fullName,
-      contact_name: fullName,
-      recipient: fullName,
-      nom: fullName,
-      nom_complet: fullName,
+      fullName: trimmedName,
+      full_name: trimmedName,
+      customerName: trimmedName,
+      customer_name: trimmedName,
+      clientName: trimmedName,
+      client_name: trimmedName,
+      name: trimmedName,
+      client: trimmedName,
+      buyerName: trimmedName,
+      buyer_name: trimmedName,
+      userName: trimmedName,
+      user_name: trimmedName,
+      contactName: trimmedName,
+      contact_name: trimmedName,
+      recipient: trimmedName,
+      nom: trimmedName,
+      nom_complet: trimmedName,
 
       // Phone variations
-      phone: phone,
-      phone_number: phone,
-      phoneNumber: phone,
-      telephone: phone,
-      tel: phone,
-      mobile: phone,
-      gsm: phone,
-      contact_phone: phone,
+      phone: trimmedPhone,
+      phone_number: trimmedPhone,
+      phoneNumber: trimmedPhone,
+      telephone: trimmedPhone,
+      tel: trimmedPhone,
+      mobile: trimmedPhone,
+      gsm: trimmedPhone,
+      contact_phone: trimmedPhone,
 
       // City variations
-      city: city,
-      ville: city,
-      cityName: city,
-      city_name: city,
-      location: city,
+      city: trimmedCity,
+      ville: trimmedCity,
+      cityName: trimmedCity,
+      city_name: trimmedCity,
+      location: trimmedCity,
 
       // Address variations
-      address: address,
-      adresse: address,
-      address1: address,
-      address_1: address,
-      street: address,
-      street_address: address,
-      line1: address,
-      full_address: `${address}, ${city}`,
+      address: trimmedAddress,
+      adresse: trimmedAddress,
+      address1: trimmedAddress,
+      address_1: trimmedAddress,
+      street: trimmedAddress,
+      street_address: trimmedAddress,
+      line1: trimmedAddress,
+      full_address: `${trimmedAddress}, ${trimmedCity}`,
 
       // Object variations for customer / client / shipping
       customer: customerObj,
@@ -224,9 +232,9 @@ export const CODCheckoutModal: React.FC<CODCheckoutModalProps> = ({
       billingAddress: shippingObj,
       billing_address: shippingObj,
 
-      notes: notes || '',
-      note: notes || '',
-      comment: notes || '',
+      notes: trimmedNotes,
+      note: trimmedNotes,
+      comment: trimmedNotes,
 
       // Items / Products variations
       items: formattedItems,
@@ -254,6 +262,15 @@ export const CODCheckoutModal: React.FC<CODCheckoutModalProps> = ({
 
       createdAt: new Date().toISOString(),
       created_at: new Date().toISOString()
+    };
+
+    // Include top-level fields plus wrapper objects in case Admin App reads req.body.data / req.body.order
+    const orderData: any = {
+      ...basePayload,
+      data: basePayload,
+      order: basePayload,
+      payload: basePayload,
+      body: basePayload
     };
 
     // Send POST request directly to Admin App Webhook API (https://azagshoes.ai.studio/api/webhooks/orders)
