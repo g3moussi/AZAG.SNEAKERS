@@ -76,62 +76,182 @@ export const CODCheckoutModal: React.FC<CODCheckoutModalProps> = ({
       return {
         id: item.product.id,
         product_id: item.product.id,
+        productId: item.product.id,
         productName: item.product.name,
         product_name: item.product.name,
         name: item.product.name,
         title: item.product.name,
         price: itemPrice,
         unit_price: itemPrice,
+        unitPrice: itemPrice,
         quantity: itemQty,
         qty: itemQty,
+        count: itemQty,
         size: item.selectedSize,
         pointure: item.selectedSize,
+        selectedSize: item.selectedSize,
         color: item.selectedColor.name,
         couleur: item.selectedColor.name,
+        selectedColor: item.selectedColor.name,
         image: imgUrl,
-        img: imgUrl
+        img: imgUrl,
+        thumbnail: imgUrl,
+        image_url: imgUrl,
+        imageUrl: imgUrl
       };
     });
 
     const finalTotal = Number(total) || checkoutItems.reduce((acc, i) => acc + (Number(i.product.price) * Number(i.quantity)), 0);
 
+    const customerObj = {
+      name: fullName,
+      fullName: fullName,
+      full_name: fullName,
+      customerName: fullName,
+      customer_name: fullName,
+      clientName: fullName,
+      client_name: fullName,
+      phone: phone,
+      phone_number: phone,
+      phoneNumber: phone,
+      telephone: phone,
+      tel: phone,
+      mobile: phone,
+      city: city,
+      ville: city,
+      address: address,
+      adresse: address,
+      shipping_address: address,
+      shippingAddress: address
+    };
+
+    const shippingObj = {
+      name: fullName,
+      fullName: fullName,
+      full_name: fullName,
+      customerName: fullName,
+      phone: phone,
+      phone_number: phone,
+      phoneNumber: phone,
+      telephone: phone,
+      city: city,
+      ville: city,
+      address: address,
+      address1: address,
+      adresse: address,
+      line1: address,
+      country: 'Morocco'
+    };
+
     const orderData: any = {
+      // Order ID variations
       orderId: generatedCode,
       order_id: generatedCode,
       id: generatedCode,
       code: generatedCode,
+      number: generatedCode,
+      orderNumber: generatedCode,
+      order_number: generatedCode,
+
+      // Top-level Customer Name variations
+      fullName: fullName,
+      full_name: fullName,
       customerName: fullName,
       customer_name: fullName,
+      clientName: fullName,
       client_name: fullName,
       name: fullName,
-      customer: {
-        name: fullName,
-        customerName: fullName,
-        customer_name: fullName,
-        phone: phone,
-        phone_number: phone,
-        city: city,
-        address: address,
-        shipping_address: address
-      },
-      phone,
+      client: fullName,
+      buyerName: fullName,
+      buyer_name: fullName,
+      userName: fullName,
+      user_name: fullName,
+      contactName: fullName,
+      contact_name: fullName,
+      recipient: fullName,
+      nom: fullName,
+      nom_complet: fullName,
+
+      // Phone variations
+      phone: phone,
       phone_number: phone,
+      phoneNumber: phone,
       telephone: phone,
-      city,
+      tel: phone,
+      mobile: phone,
+      gsm: phone,
+      contact_phone: phone,
+
+      // City variations
+      city: city,
       ville: city,
-      address,
+      cityName: city,
+      city_name: city,
+      location: city,
+
+      // Address variations
+      address: address,
       adresse: address,
-      shipping_address: address,
-      notes: notes || undefined,
+      address1: address,
+      address_1: address,
+      street: address,
+      street_address: address,
+      line1: address,
+      full_address: `${address}, ${city}`,
+
+      // Object variations for customer / client / shipping
+      customer: customerObj,
+      customerDetails: customerObj,
+      customer_details: customerObj,
+      customerInfo: customerObj,
+      customer_info: customerObj,
+      clientDetails: customerObj,
+      client_details: customerObj,
+      clientInfo: customerObj,
+      client_info: customerObj,
+      userInfo: customerObj,
+      user_info: customerObj,
+      buyer: customerObj,
+      contact: customerObj,
+
+      shipping: shippingObj,
+      shippingAddress: shippingObj,
+      shipping_address: shippingObj,
+      delivery: shippingObj,
+      deliveryAddress: shippingObj,
+      delivery_address: shippingObj,
+      billing: shippingObj,
+      billingAddress: shippingObj,
+      billing_address: shippingObj,
+
+      notes: notes || '',
+      note: notes || '',
+      comment: notes || '',
+
+      // Items / Products variations
       items: formattedItems,
       products: formattedItems,
       cart: formattedItems,
+      line_items: formattedItems,
+      lineItems: formattedItems,
+      order_items: formattedItems,
+      orderItems: formattedItems,
+
+      // Totals
       totalPrice: finalTotal,
       total_price: finalTotal,
       total: finalTotal,
       amount: finalTotal,
-      currency,
+      subtotal: subtotal,
+      sub_total: subtotal,
+      shipping_fee: shipping,
+      shippingFee: shipping,
+      currency: currency,
       status: 'pending',
+      payment_method: 'COD',
+      paymentMethod: 'COD',
+      type: 'COD',
+
       createdAt: new Date().toISOString(),
       created_at: new Date().toISOString()
     };
