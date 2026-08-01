@@ -93,23 +93,18 @@ export const CODCheckoutModal: React.FC<CODCheckoutModalProps> = ({
       createdAt: new Date().toISOString()
     };
 
-    const waUrl = generateWhatsAppUrl(generatedCode);
-
-    // REST API call to send order to the Admin App (https://azagshoes.ai.studio)
-    sendOrderToAdminApp(orderData).then((res) => {
+    // Send POST request directly to Admin App Webhook API (https://azagshoes.ai.studio/api/webhooks/orders)
+    try {
+      const res = await sendOrderToAdminApp(orderData);
       setSyncStatus(res.success ? 'success' : 'failed');
-    });
-
-    setTimeout(() => {
+    } catch (err) {
+      console.error('API Webhook delivery error:', err);
+      setSyncStatus('failed');
+    } finally {
       setIsSubmitting(false);
       setOrderComplete(true);
       onOrderSuccess();
-      try {
-        window.open(waUrl, '_blank');
-      } catch {
-        // Fallback if popup blocked
-      }
-    }, 400);
+    }
   };
 
   const generateWhatsAppUrl = (code: string) => {
@@ -187,24 +182,38 @@ export const CODCheckoutModal: React.FC<CODCheckoutModalProps> = ({
 
             <div className="bg-[#FAF8F5] p-6 rounded-2xl border border-[#E8E2D9] text-start space-y-3 text-xs text-[#3D3028]">
               <div className="flex justify-between border-b border-[#E8E2D9] pb-2">
+                <span className="font-semibold text-[#7C6E65]">{t.fullNameLabel}:</span>
+                <span className="font-bold text-[#2C2118]">{fullName}</span>
+              </div>
+              <div className="flex justify-between border-b border-[#E8E2D9] pb-2">
                 <span className="font-semibold text-[#7C6E65]">{t.cityLabel}:</span>
                 <span className="font-bold text-[#2C2118]">{city}</span>
+              </div>
+              <div className="flex justify-between border-b border-[#E8E2D9] pb-2">
+                <span className="font-semibold text-[#7C6E65]">{t.addressLabel}:</span>
+                <span className="font-bold text-[#2C2118]">{address}</span>
               </div>
               <div className="flex justify-between border-b border-[#E8E2D9] pb-2">
                 <span className="font-semibold text-[#7C6E65]">{t.phoneLabel}:</span>
                 <span className="font-bold text-[#2C2118]">{phone}</span>
               </div>
               <div className="flex justify-between border-b border-[#E8E2D9] pb-2">
+                <span className="font-semibold text-[#7C6E65]">{t.orderSummary}:</span>
+                <span className="font-bold text-[#2C2118]">
+                  {checkoutItems.length} {lang === 'ar' ? 'منتجات' : 'article(s)'}
+                </span>
+              </div>
+              <div className="flex justify-between border-b border-[#E8E2D9] pb-2">
                 <span className="font-semibold text-[#7C6E65]">{t.totalToPay}:</span>
                 <span className="font-black text-[#8C5628] text-sm">{formatPrice(total, currency)}</span>
               </div>
-              <div className="flex justify-between items-center pt-1 text-[11px]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pt-2 text-[11px] bg-[#F5EBE6]/60 p-2.5 rounded-xl border border-[#E6CCB2]">
                 <span className="font-semibold text-[#7C6E65] flex items-center gap-1.5">
-                  <CloudCheck className="w-3.5 h-3.5 text-[#8C5628]" />
-                  {lang === 'ar' ? 'المزامنة مع لوحة التحكم:' : 'Maison Admin Sync:'}
+                  <CloudCheck className="w-4 h-4 text-[#8C5628]" />
+                  {lang === 'ar' ? 'مزامنة API Webhook:' : 'API Webhook Endpoint:'}
                 </span>
-                <span className="font-bold text-[#8C5628] bg-[#F5EBE6] px-2.5 py-0.5 rounded-full border border-[#E6CCB2]">
-                  https://azagshoes.ai.studio
+                <span className="font-mono font-bold text-[#8C5628] truncate text-[10px] sm:text-[11px]">
+                  https://azagshoes.ai.studio/api/webhooks/orders
                 </span>
               </div>
             </div>
