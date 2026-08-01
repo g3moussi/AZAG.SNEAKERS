@@ -64,33 +64,63 @@ export const CODCheckoutModal: React.FC<CODCheckoutModalProps> = ({
 
     setIsSubmitting(true);
     setSyncStatus('syncing');
-    const generatedCode = 'AZAG-' + Math.floor(100000 + Math.random() * 900000);
+    const uniqueSuffix = Date.now().toString().slice(-5) + Math.floor(100 + Math.random() * 900);
+    const generatedCode = 'AZAG-' + uniqueSuffix;
     setOrderId(generatedCode);
 
-    const orderData: OrderPayload = {
+    const formattedItems = checkoutItems.map((item) => {
+      const rawImg = item.selectedColor.image || item.product.mainImage;
+      const imgUrl = rawImg.startsWith('http') ? rawImg : `${window.location.origin}${rawImg}`;
+      const itemPrice = Number(item.product.price) || 0;
+      const itemQty = Number(item.quantity) || 1;
+      return {
+        id: item.product.id,
+        product_id: item.product.id,
+        productName: item.product.name,
+        product_name: item.product.name,
+        name: item.product.name,
+        title: item.product.name,
+        price: itemPrice,
+        unit_price: itemPrice,
+        quantity: itemQty,
+        qty: itemQty,
+        size: item.selectedSize,
+        pointure: item.selectedSize,
+        color: item.selectedColor.name,
+        couleur: item.selectedColor.name,
+        image: imgUrl,
+        img: imgUrl
+      };
+    });
+
+    const finalTotal = Number(total) || checkoutItems.reduce((acc, i) => acc + (Number(i.product.price) * Number(i.quantity)), 0);
+
+    const orderData: any = {
       orderId: generatedCode,
+      order_id: generatedCode,
+      id: generatedCode,
+      code: generatedCode,
       customerName: fullName,
+      customer_name: fullName,
+      client_name: fullName,
+      name: fullName,
       phone,
+      phone_number: phone,
+      telephone: phone,
       city,
       address,
+      shipping_address: address,
       notes: notes || undefined,
-      items: checkoutItems.map((item) => {
-        const rawImg = item.selectedColor.image || item.product.mainImage;
-        const imgUrl = rawImg.startsWith('http') ? rawImg : `${window.location.origin}${rawImg}`;
-        return {
-          id: item.product.id,
-          productName: item.product.name,
-          price: item.product.price,
-          quantity: item.quantity,
-          size: item.selectedSize,
-          color: item.selectedColor.name,
-          image: imgUrl
-        };
-      }),
-      totalPrice: total,
+      items: formattedItems,
+      products: formattedItems,
+      totalPrice: finalTotal,
+      total_price: finalTotal,
+      total: finalTotal,
+      amount: finalTotal,
       currency,
       status: 'pending',
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      created_at: new Date().toISOString()
     };
 
     // Send POST request directly to Admin App Webhook API (https://azagshoes.ai.studio/api/webhooks/orders)
