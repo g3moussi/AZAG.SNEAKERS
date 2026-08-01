@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { X, Truck, CheckCircle2, ShieldCheck, MapPin, Phone, User, ShoppingBag, ArrowLeft } from 'lucide-react';
+import { X, Truck, CheckCircle2, ShieldCheck, MapPin, Phone, User, ShoppingBag, ArrowLeft, CloudCheck } from 'lucide-react';
 import { CartItem, Product, ProductColor } from '../types';
 import { MOROCCAN_CITIES } from '../data/products';
 import { Currency, formatPrice } from '../utils/format';
 import { Language, TRANSLATIONS, getTranslatedProduct } from '../utils/i18n';
+import { sendOrderToAdminApp, OrderPayload } from '../utils/orderSync';
 
 interface CODCheckoutModalProps {
   isOpen: boolean;
@@ -41,6 +42,7 @@ export const CODCheckoutModal: React.FC<CODCheckoutModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderId, setOrderId] = useState('');
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'success' | 'failed'>('idle');
 
   const rawCheckoutItems: CartItem[] = directProduct
     ? [{ product: directProduct.product, selectedSize: directProduct.size, selectedColor: directProduct.color, quantity: directProduct.quantity }]
@@ -56,15 +58,47 @@ export const CODCheckoutModal: React.FC<CODCheckoutModalProps> = ({
   const shipping = isFreeShipping ? 0 : 30;
   const total = subtotal + shipping;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fullName || !phone || !address) return;
 
     setIsSubmitting(true);
+    setSyncStatus('syncing');
     const generatedCode = 'AZAG-' + Math.floor(100000 + Math.random() * 900000);
     setOrderId(generatedCode);
 
+    const orderData: OrderPayload = {
+      orderId: generatedCode,
+      customerName: fullName,
+      phone,
+      city,
+      address,
+      notes: notes || undefined,
+      items: checkoutItems.map((item) => {
+        const rawImg = item.selectedColor.image || item.product.mainImage;
+        const imgUrl = rawImg.startsWith('http') ? rawImg : `${window.location.origin}${rawImg}`;
+        return {
+          id: item.product.id,
+          productName: item.product.name,
+          price: item.product.price,
+          quantity: item.quantity,
+          size: item.selectedSize,
+          color: item.selectedColor.name,
+          image: imgUrl
+        };
+      }),
+      totalPrice: total,
+      currency,
+      status: 'pending',
+      createdAt: new Date().toISOString()
+    };
+
     const waUrl = generateWhatsAppUrl(generatedCode);
+
+    // REST API call to send order to the Admin App (https://azagshoes.ai.studio)
+    sendOrderToAdminApp(orderData).then((res) => {
+      setSyncStatus(res.success ? 'success' : 'failed');
+    });
 
     setTimeout(() => {
       setIsSubmitting(false);
@@ -75,7 +109,7 @@ export const CODCheckoutModal: React.FC<CODCheckoutModalProps> = ({
       } catch {
         // Fallback if popup blocked
       }
-    }, 600);
+    }, 400);
   };
 
   const generateWhatsAppUrl = (code: string) => {
@@ -163,6 +197,15 @@ export const CODCheckoutModal: React.FC<CODCheckoutModalProps> = ({
               <div className="flex justify-between border-b border-[#E8E2D9] pb-2">
                 <span className="font-semibold text-[#7C6E65]">{t.totalToPay}:</span>
                 <span className="font-black text-[#8C5628] text-sm">{formatPrice(total, currency)}</span>
+              </div>
+              <div className="flex justify-between items-center pt-1 text-[11px]">
+                <span className="font-semibold text-[#7C6E65] flex items-center gap-1.5">
+                  <CloudCheck className="w-3.5 h-3.5 text-[#8C5628]" />
+                  {lang === 'ar' ? 'المزامنة مع لوحة التحكم:' : 'Maison Admin Sync:'}
+                </span>
+                <span className="font-bold text-[#8C5628] bg-[#F5EBE6] px-2.5 py-0.5 rounded-full border border-[#E6CCB2]">
+                  https://azagshoes.ai.studio
+                </span>
               </div>
             </div>
 

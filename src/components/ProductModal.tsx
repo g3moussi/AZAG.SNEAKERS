@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Star, Heart, ShoppingBag, Truck, ShieldCheck, Ruler, Check, ChevronRight, ArrowLeft } from 'lucide-react';
+import { X, Star, Heart, Truck, ShieldCheck, Ruler, ChevronRight, ArrowLeft } from 'lucide-react';
 import { Product, ProductColor } from '../types';
 import { Currency, formatPrice } from '../utils/format';
 import { Language, TRANSLATIONS, getTranslatedProduct } from '../utils/i18n';
@@ -37,7 +37,6 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   const [selectedImage, setSelectedImage] = useState<string>(selectedColor.image || product.mainImage);
   const [quantity, setQuantity] = useState<number>(1);
   const [activeTab, setActiveTab] = useState<'desc' | 'materials' | 'shipping' | 'reviews'>('desc');
-  const [addedToast, setAddedToast] = useState(false);
 
   // Collect all unique images for this product (color images + gallery)
   const allImages = Array.from(new Set([
@@ -62,12 +61,6 @@ export const ProductModal: React.FC<ProductModalProps> = ({
     if (matchingColor) {
       setSelectedColor(matchingColor);
     }
-  };
-
-  const handleAddToCart = () => {
-    onAddToCart(product, selectedSize, selectedColor, quantity);
-    setAddedToast(true);
-    setTimeout(() => setAddedToast(false), 2000);
   };
 
   return (
@@ -264,29 +257,17 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                 </div>
               </div>
 
-              {/* CTA Action Buttons */}
+              {/* CTA Action Button */}
               <div className="space-y-3">
-                <button
-                  onClick={handleAddToCart}
-                  className="w-full bg-[#2C2118] text-white font-bold py-3.5 px-6 rounded-2xl hover:bg-[#3D3028] transition-all flex items-center justify-center gap-2 shadow-md group"
-                >
-                  <ShoppingBag className="w-5 h-5 text-[#D4A373] group-hover:scale-110 transition-transform" />
-                  {addedToast ? (
-                    <span className="text-emerald-300 font-bold flex items-center gap-1">
-                      <Check className="w-5 h-5" /> {lang === 'ar' ? 'تمت الإضافة للسلة!' : 'Ajouté au Panier !'}
-                    </span>
-                  ) : (
-                    `${t.addToCart} • ${formatPrice(product.price * quantity, currency)}`
-                  )}
-                </button>
-
-                {/* Direct Moroccan COD Order Button */}
+                {/* Direct Order Button */}
                 <button
                   onClick={() => onOpenCODCheckout(product, selectedSize, selectedColor, quantity)}
-                  className="w-full bg-[#D4A373] text-[#2C2118] font-extrabold py-3.5 px-6 rounded-2xl hover:bg-[#C08552] transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform active:scale-98"
+                  className="w-full bg-[#2C2118] text-white font-extrabold py-4 px-6 rounded-2xl hover:bg-[#3D3028] transition-all flex items-center justify-center gap-2.5 shadow-md hover:shadow-lg transform active:scale-98 group cursor-pointer"
                 >
-                  <Truck className="w-5 h-5 text-[#2C2118]" />
-                  {t.buyNowCOD}
+                  <Truck className="w-5 h-5 text-[#D4A373] group-hover:scale-110 transition-transform" />
+                  <span className="text-sm font-bold">
+                    {t.buyNowCOD} • {formatPrice(product.price * quantity, currency)}
+                  </span>
                 </button>
               </div>
 
