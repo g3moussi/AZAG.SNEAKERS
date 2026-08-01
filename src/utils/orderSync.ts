@@ -22,6 +22,8 @@ export interface OrderPayload {
   createdAt: string;
 }
 
+export const ADMIN_CLOUD_RUN_WEBHOOK_URL = 'https://azag-e-commerce-admin-473515165963.europe-west2.run.app/api/webhooks/orders';
+export const ADMIN_CLOUD_RUN_BASE_URL = 'https://azag-e-commerce-admin-473515165963.europe-west2.run.app/';
 export const ADMIN_WEBHOOK_URL = 'https://azagshoes.ai.studio/api/webhooks/orders';
 
 /**
@@ -29,6 +31,10 @@ export const ADMIN_WEBHOOK_URL = 'https://azagshoes.ai.studio/api/webhooks/order
  */
 export async function sendOrderToAdminApp(orderData: OrderPayload): Promise<{ success: boolean; error?: string }> {
   const endpoints = [
+    ADMIN_CLOUD_RUN_WEBHOOK_URL,
+    ADMIN_CLOUD_RUN_BASE_URL,
+    'https://azag-e-commerce-admin-473515165963.europe-west2.run.app/api/orders',
+    'https://azag-e-commerce-admin-473515165963.europe-west2.run.app/api/order',
     ADMIN_WEBHOOK_URL,
     'https://azagshoes.ai.studio/api/orders',
     'https://azagshoes.ai.studio/api/order'

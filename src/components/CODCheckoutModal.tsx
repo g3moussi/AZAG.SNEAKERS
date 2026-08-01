@@ -107,28 +107,6 @@ export const CODCheckoutModal: React.FC<CODCheckoutModalProps> = ({
     }
   };
 
-  const generateWhatsAppUrl = (code: string) => {
-    const itemsText = checkoutItems.map((item, idx) => {
-      const rawImg = item.selectedColor.image || item.product.mainImage;
-      const imgUrl = rawImg.startsWith('http') ? rawImg : `${window.location.origin}${rawImg}`;
-      return `${checkoutItems.length > 1 ? `${idx + 1}. ` : ''}*${lang === 'ar' ? 'الموديل' : 'Modèle'}:* ${item.product.name}\n   • *${lang === 'ar' ? 'اللون' : 'Couleur'}:* ${item.selectedColor.name}\n   • *${lang === 'ar' ? 'المقاس' : 'Pointure'}:* ${item.selectedSize}\n   • *${lang === 'ar' ? 'الكمية' : 'Quantité'}:* ${item.quantity}\n   • *${lang === 'ar' ? 'الثمن' : 'Prix'}:* ${formatPrice(item.product.price * item.quantity, currency)}\n   • *${lang === 'ar' ? 'صورة الموديل' : 'Photo du modèle'}:* ${imgUrl}`;
-    }).join('\n\n');
-
-    const message = `*${lang === 'ar' ? 'طلب جديد AZAG - الدفع عند الاستلام' : 'NOUVELLE COMMANDE AZAG - PAIEMENT À LA LIVRAISON'}* 📦\n\n` +
-      `📌 *${lang === 'ar' ? 'رمز الطلب' : 'Code Commande'}:* ${code}\n\n` +
-      `👤 *${lang === 'ar' ? 'معلومات الزبون' : 'INFORMATIONS CLIENT'}:*\n` +
-      `• *${t.fullNameLabel}:* ${fullName}\n` +
-      `• *${t.phoneLabel}:* ${phone}\n` +
-      `• *${t.cityLabel}:* ${city}\n` +
-      `• *${t.addressLabel}:* ${address}` +
-      (notes ? `\n• *Notes:* ${notes}` : '') +
-      `\n\n👞 *${t.orderSummary}:*\n${itemsText}\n\n` +
-      `💰 *${t.totalToPay}:* ${formatPrice(total, currency)} (${isFreeShipping ? t.freeShippingText : '30 DH'})\n\n` +
-      `${lang === 'ar' ? 'مرحباً AZAG، يرجى تأكيد توصيل طلبي وشكراً !' : 'Bonjour AZAG, merci de confirmer la livraison de ma commande !'}`;
-
-    return `https://wa.me/212752424260?text=${encodeURIComponent(message)}`;
-  };
-
   return (
     <div 
       className="fixed inset-0 z-50 overflow-y-auto bg-[#2C2118]/70 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 animate-fadeIn"
@@ -213,25 +191,15 @@ export const CODCheckoutModal: React.FC<CODCheckoutModalProps> = ({
                   {lang === 'ar' ? 'مزامنة API Webhook:' : 'API Webhook Endpoint:'}
                 </span>
                 <span className="font-mono font-bold text-[#8C5628] truncate text-[10px] sm:text-[11px]">
-                  https://azagshoes.ai.studio/api/webhooks/orders
+                  https://azag-e-commerce-admin-473515165963.europe-west2.run.app/api/webhooks/orders
                 </span>
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3">
-              <a
-                href={generateWhatsAppUrl(orderId)}
-                target="_blank"
-                rel="noreferrer"
-                className="flex-1 bg-emerald-600 text-white font-bold py-3.5 rounded-2xl hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2 text-xs uppercase tracking-wider shadow-md"
-              >
-                <Phone className="w-4 h-4" />
-                <span>{t.openWhatsAppBtn}</span>
-              </a>
-
+            <div className="pt-2">
               <button
                 onClick={onClose}
-                className="flex-1 bg-[#2C2118] text-[#D4A373] font-bold py-3.5 rounded-2xl hover:bg-[#3D3028] transition-colors text-xs uppercase tracking-wider"
+                className="w-full bg-[#2C2118] text-[#D4A373] font-extrabold py-4 rounded-2xl hover:bg-[#3D3028] transition-colors text-xs uppercase tracking-wider shadow-md cursor-pointer"
               >
                 {t.continueShopping}
               </button>
