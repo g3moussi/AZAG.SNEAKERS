@@ -8,27 +8,19 @@ async function startServer() {
 
   app.use(express.json());
 
-  // Server-side proxy API route to send order details directly to Admin App endpoints
+  // Server-side proxy API route to send order details directly to Admin App endpoint
   // Bypasses browser CORS restriction ("Failed to fetch")
   app.post("/api/sync-order", async (req, res) => {
     const orderData = req.body;
     
-    // Primary webhook endpoint
-    const primaryEndpoint = "https://azag-e-commerce-admin-473515165963.europe-west2.run.app/api/webhooks/orders";
-    
-    // Secondary fallback endpoints if primary fails (note: root URL '/' is excluded to prevent empty stub orders)
-    const fallbackEndpoints = [
-      "https://azag-e-commerce-admin-473515165963.europe-west2.run.app/api/orders",
-      "https://azag-e-commerce-admin-473515165963.europe-west2.run.app/api/order",
-      "https://azagshoes.ai.studio/api/webhooks/orders"
-    ];
+    // Official webhook endpoint for the published Admin App
+    const targetEndpoint = "https://azag-e-commerce-admin-473515165963.europe-west2.run.app/api/webhooks/orders";
 
     const orderId = orderData?.orderId || orderData?.id || 'NEW_ORDER';
-    console.log(`[Server Proxy] Processing order sync for: ${orderId}`);
+    console.log(`[Server Proxy] Processing single order sync for ${orderId} -> ${targetEndpoint}`);
 
-    // Try primary endpoint first
     try {
-      const response = await fetch(primaryEndpoint, {
+      const response = await fetch(targetEndpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -37,36 +29,14 @@ async function startServer() {
         body: JSON.stringify(orderData),
       });
 
-      if (response.ok || response.status < 400) {
-        console.log(`[Server Proxy] Order ${orderId} successfully posted to ${primaryEndpoint} (Status ${response.status})`);
-        return res.json({ success: true, endpoint: primaryEndpoint, status: response.status });
-      }
+      const responseText = await response.text().catch(() => "");
+      console.log(`[Server Proxy] Posted to ${targetEndpoint} -> Status ${response.status}`, responseText);
+
+      return res.json({ success: true, status: response.status, endpoint: targetEndpoint });
     } catch (err: any) {
-      console.warn(`[Server Proxy] Primary endpoint failed:`, err?.message || err);
+      console.error(`[Server Proxy] Error posting to ${targetEndpoint}:`, err?.message || err);
+      return res.status(500).json({ success: false, error: err?.message || "Failed to reach Admin App" });
     }
-
-    // Try fallbacks sequentially, stopping at the first successful POST
-    for (const endpoint of fallbackEndpoints) {
-      try {
-        const response = await fetch(endpoint, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-          },
-          body: JSON.stringify(orderData),
-        });
-
-        if (response.ok || response.status < 400) {
-          console.log(`[Server Proxy] Order ${orderId} posted to fallback ${endpoint} (Status ${response.status})`);
-          return res.json({ success: true, endpoint, status: response.status });
-        }
-      } catch (err: any) {
-        console.warn(`[Server Proxy] Fallback endpoint ${endpoint} failed:`, err?.message || err);
-      }
-    }
-
-    return res.json({ success: true, orderId });
   });
 
   // Health check endpoint
